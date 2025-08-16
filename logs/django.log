@@ -8586,3 +8586,15 @@ INFO 2025-08-03 15:11:24,089 basehttp 16452 7908 "GET /media/product_images/hp-p
 INFO 2025-08-03 15:11:24,153 basehttp 16452 3248 "GET /media/product_images/Dell_inspiron_15_3530.webp HTTP/1.1" 200 11656
 INFO 2025-08-03 15:11:24,239 basehttp 16452 25436 "GET /media/product_images/apple-macbook-air-13-mw123-m4-chip-pakistan-priceoye-qhvrf-500x500.webp HTTP/1.1" 200 10754
 INFO 2025-08-03 15:11:24,306 basehttp 16452 19600 "GET /media/product_images/20250730_0047_Jadeed_Gadgets_Banner_simple_compose_01k1bvegz9fm7s1832fp1d3cpp.png HTTP/1.1" 200 2375412
+INFO 2025-08-17 00:19:55,305 autoreload 144 13876 Watching for file changes with StatReloader
+INFO 2025-08-17 00:20:56,798 basehttp 144 13904 "GET / HTTP/1.1" 200 96683
+INFO 2025-08-17 00:20:57,519 basehttp 144 12992 "GET /static/images/logo2.png HTTP/1.1" 200 57617
+INFO 2025-08-17 00:20:57,602 basehttp 144 13904 "GET /static/css/style.css HTTP/1.1" 200 38509
+INFO 2025-08-17 00:20:57,678 basehttp 144 21296 "GET /media/product_images/Dell_inspiron_15_3530.webp HTTP/1.1" 200 11656
+INFO 2025-08-17 00:20:57,719 basehttp 144 18420 "GET /media/product_images/hp-probook-440-g10-core-i7-8gb-512gb-nvme-ssd-pakistan-priceoye-v7kki-500x500.webp HTTP/1.1" 200 13764
+INFO 2025-08-17 00:20:57,779 basehttp 144 18420 "GET /media/product_images/Caddy_JoDvxu9.webp HTTP/1.1" 200 17880
+INFO 2025-08-17 00:20:57,784 basehttp 144 17964 "GET /media/product_images/apple-macbook-air-13-mw123-m4-chip-pakistan-priceoye-qhvrf-500x500.webp HTTP/1.1" 200 10754
+INFO 2025-08-17 00:20:57,807 basehttp 144 372 "GET /media/product_images/20250730_0047_Jadeed_Gadgets_Banner_simple_compose_01k1bvegz9fm7s1832fp1d3cpp.png HTTP/1.1" 200 2375412
+INFO 2025-08-17 00:20:57,827 basehttp 144 17964 "GET /static/images/banner4.png HTTP/1.1" 200 2375412
+WARNING 2025-08-17 00:20:59,448 log 144 17964 Not Found: /favicon.ico
+WARNING 2025-08-17 00:20:59,448 basehttp 144 17964 "GET /favicon.ico HTTP/1.1" 404 4586

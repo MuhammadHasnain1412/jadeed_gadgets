@@ -1,0 +1,26 @@
+databases:
+  - name: jadeedgadgets-db
+    databaseName: jadeedgadgets
+    user: jadeedgadgets
+    region: oregon
+
+services:
+  - type: web
+    name: jadeedgadgets
+    runtime: python3
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn jadeedgadgets.wsgi:application"
+    plan: free
+    branch: main
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jadeedgadgets-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: "*"
