@@ -1,0 +1,511 @@
+{% extends 'seller/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Price Comparison Dashboard{% endblock %}
+
+{% block extra_styles %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    body {
+        background: var(--gray-50);
+        font-family: 'Inter', sans-serif;
+        line-height: 1.6;
+    }
+    .modern-card {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        transition: var(--transition);
+    }
+    .modern-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    .insight-card {
+        background: var(--primary);
+        color: white;
+        border-radius: var(--radius-lg);
+        padding: var(--space-6);
+        margin-bottom: var(--space-6);
+        border: none;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+    .insight-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s;
+    }
+    .insight-card:hover::before {
+        left: 100%;
+    }
+    .insight-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+    .insight-card.success {
+        background: linear-gradient(135deg, var(--success) 0%, var(--accent) 100%);
+    }
+    .insight-card.warning {
+        background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+    }
+    .insight-card.danger {
+        background: linear-gradient(135deg, var(--error) 0%, #c0392b 100%);
+    }
+    .insight-number {
+        font-size: var(--text-5xl);
+        font-weight: 800;
+        margin-bottom: var(--space-2);
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .insight-label {
+        font-size: var(--text-base);
+        opacity: 0.95;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .back-button {
+        background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        padding: 8px 16px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .back-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        color: white;
+        text-decoration: none;
+    }
+    .competitive-badge {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 2px solid rgba(28, 200, 138, 0.2);
+    }
+    .overpriced-badge {
+        background: linear-gradient(135deg, #e74a3b 0%, #c82333 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 2px solid rgba(231, 74, 59, 0.2);
+    }
+    .underpriced-badge {
+        background: linear-gradient(135deg, #f6c23e 0%, #d4a119 100%);
+        color: #2c2c2c;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 2px solid rgba(246, 194, 62, 0.2);
+    }
+    .price-difference.positive {
+        color: #e74a3b;
+        font-weight: 600;
+    }
+    .price-difference.negative {
+        color: #1cc88a;
+        font-weight: 600;
+    }
+    .table thead th {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+        border-bottom: 2px solid var(--gray-200);
+        color: var(--gray-700);
+        font-weight: 700;
+        font-size: var(--text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: var(--space-4) var(--space-3);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    .table tbody tr {
+        transition: var(--transition-fast);
+        border-bottom: 1px solid var(--gray-100);
+    }
+    .table tbody tr:hover {
+        background-color: var(--gray-50);
+        transform: scale(1.01);
+        box-shadow: var(--shadow-xs);
+    }
+    .table td {
+        padding: var(--space-4) var(--space-3);
+        vertical-align: middle;
+        border-top: none;
+    }
+    .btn-modern {
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        padding: var(--space-3) var(--space-6);
+        border: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    .btn-primary.btn-modern {
+        background: var(--primary);
+        color: white;
+    }
+    .btn-success.btn-modern {
+        background: linear-gradient(135deg, var(--success) 0%, var(--accent) 100%);
+        color: white;
+    }
+    .page-header {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        padding: var(--space-8) var(--space-10);
+        margin-bottom: var(--space-8);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        position: relative;
+        overflow: hidden;
+    }
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary);
+    }
+    .page-title {
+        color: var(--gray-900);
+        font-weight: 800;
+        margin-bottom: var(--space-2);
+        font-size: var(--text-3xl);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+    }
+    .page-subtitle {
+        color: var(--gray-600);
+        font-size: var(--text-lg);
+        font-weight: 400;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h2 class="page-title">
+                    <i class="fas fa-chart-line text-primary"></i> Price Comparison Dashboard
+                </h2>
+                <p class="page-subtitle">Monitor your product pricing against PakLap and PriceOye competitors</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights Cards -->
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="insight-card">
+                <div class="insight-number">{{ insights.total_products }}</div>
+                <div class="insight-label">Total Products</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="insight-card success">
+                <div class="insight-number">{{ insights.competitive_count }}</div>
+                <div class="insight-label">Competitive Pricing</div>
+                <small style="opacity: 0.8;">{{ insights.competitive_percentage|floatformat:1 }}% of products</small>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="insight-card danger">
+                <div class="insight-number">{{ insights.overpriced_count }}</div>
+                <div class="insight-label">Overpriced Items</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="insight-card warning">
+                <div class="insight-number">{{ insights.underpriced_count }}</div>
+                <div class="insight-label">Underpriced Items</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <a href="{% url 'price_comparison:product_list' %}" class="btn btn-primary btn-modern mr-3">
+                <i class="fas fa-list"></i> View All Comparisons
+            </a>
+            <button id="refresh-all-btn" class="btn btn-success btn-modern">
+                <i class="fas fa-sync-alt"></i> Refresh All Comparisons
+            </button>
+        </div>
+    </div>
+
+    <!-- Recent Comparisons -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="modern-card">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 text-primary font-weight-bold">
+                        <i class="fas fa-chart-bar"></i> Recent Product Comparisons
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Your Price</th>
+                                    <th>PriceOye Price</th>
+                                    <th>PakLap Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comparison in recent_comparisons %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ comparison.seller_product.name }}</strong>
+                                        <br><small class="text-muted">{{ comparison.seller_product.category }}</small>
+                                    </td>
+                                    <td>Rs. {{ comparison.seller_product.price|floatformat:2|intcomma }}</td>
+                                    <td>
+                                        {% if comparison.best_priceoye_match %}
+                                            Rs. {{ comparison.best_priceoye_match.price|floatformat:2|intcomma }}
+                                            <br>
+                                            <span class="price-difference {% if comparison.priceoye_price_difference > 0 %}positive{% else %}negative{% endif %}">
+                                                {% if comparison.priceoye_price_difference > 0 %}+{% endif %}Rs. {{ comparison.priceoye_price_difference|floatformat:2|intcomma }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">No match</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if comparison.best_paklap_match %}
+                                            Rs. {{ comparison.best_paklap_match.price|floatformat:2|intcomma }}
+                                            <br>
+                                            <span class="price-difference {% if comparison.paklap_price_difference > 0 %}positive{% else %}negative{% endif %}">
+                                                {% if comparison.paklap_price_difference > 0 %}+{% endif %}Rs. {{ comparison.paklap_price_difference|floatformat:2|intcomma }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">No match</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if comparison.best_priceoye_match or comparison.best_paklap_match %}
+                                            {% if comparison.priceoye_price_difference and comparison.priceoye_price_difference > 100 or comparison.paklap_price_difference and comparison.paklap_price_difference > 100 %}
+                                                <span class="overpriced-badge">Overpriced</span>
+                                            {% elif comparison.priceoye_price_difference and comparison.priceoye_price_difference < -100 or comparison.paklap_price_difference and comparison.paklap_price_difference < -100 %}
+                                                <span class="underpriced-badge">Underpriced</span>
+                                            {% else %}
+                                                <span class="competitive-badge">Competitive</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge badge-secondary">No Match</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'price_comparison:product_detail' comparison.seller_product.id %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <p class="text-muted mb-0">No product comparisons available yet.</p>
+                                        <small>Add products to start price comparison.</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Scraping Logs -->
+        <div class="col-md-4">
+            <div class="modern-card">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 text-primary font-weight-bold">
+                        <i class="fas fa-sync-alt"></i> Recent Data Updates
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for log in recent_logs %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <strong>{{ log.get_competitor_display }}</strong>
+                            <br>
+                            <small class="text-muted">{{ log.completed_at|timesince }} ago</small>
+                        </div>
+                        <div class="text-right">
+                            <span class="badge badge-success">{{ log.products_scraped }}</span>
+                            <br>
+                            <small>products</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">No recent updates</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+    <div class="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">Updating comparisons...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Function to get CSRF token from cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Set up CSRF token for all AJAX requests
+const csrftoken = getCookie('csrftoken');
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+            // Only send the token to relative URLs i.e. same-origin requests
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+$(document).ready(function() {
+    // Refresh all comparisons
+    $('#refresh-all-btn').click(function() {
+        $('#loadingModal').modal('show');
+        
+        $.ajax({
+            url: '{% url "price_comparison:refresh_all" %}',
+            type: 'POST',
+            success: function(response) {
+                $('#loadingModal').modal('hide');
+                if (response.success) {
+                    $('.toast-container').append(`
+                        <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    ${response.message}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    `);
+                    $('.toast').toast('show');
+                    setTimeout(() => { location.reload(); }, 3000);
+                } else {
+                    $('.toast-container').append(`
+                        <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    Error: ${response.error}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    `);
+                    $('.toast').toast('show');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#loadingModal').modal('hide');
+                console.error('AJAX Error:', xhr.responseText);
+                $('.toast-container').append(`
+                    <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                Error occurred while updating comparisons: ${error}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                `);
+                $('.toast').toast('show');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

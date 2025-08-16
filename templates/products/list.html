@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}All Products - Jadeed Gadgets{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .filter-sidebar {
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .filter-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .filter-group label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 0.5rem;
+    }
+    
+    .applied-filters {
+      background-color: #e3f2fd;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .filter-badge {
+      background-color: #2196f3;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      display: inline-block;
+    }
+    
+    .product-card {
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      height: 100%;
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: contain;
+      padding: 15px;
+    }
+
+    .product-card .card-body {
+      padding: 0rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .product-badges {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+    }
+    
+    .product-badges .badge {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.5rem;
+    }
+
+    .search-results-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    /* Fixed button visibility */
+    .card-content {
+      flex-grow: 1;
+    }
+
+    .product-card .card-footer {
+      padding: 0;
+      background: transparent;
+      border: none;
+    }
+    
+    .product-card .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .product-card .btn-details {
+      flex: 1;
+    }
+    
+    .stock-badge {
+      margin: 10px 0;
+    }
+    
+    .wishlist-btn {
+      width: 36px;
+    }
+    
+    .add-to-cart-btn {
+      margin-top: 10px;
+      font-size: 10px;
+    }
+    
+    /* Fix badge colors for better Bootstrap 5 compatibility */
+    .badge.bg-warning {
+      background-color: #ffc107 !important;
+      color: #212529 !important;
+    }
+
+    .badge.bg-danger {
+      background-color: #dc3545 !important;
+      color: white !important;
+    }
+    
+    .card-title {
+      font-size: 1.05rem;
+      height: 2.8rem;
+      overflow: hidden;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-3">
+      <div class="filter-sidebar">
+        <h5 class="mb-3">Filter Products</h5>
+        <form method="GET">
+          <div class="filter-group">
+            <label for="search">Search</label>
+            <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ form.search.value }}">
+          </div>
+
+          <div class="filter-group">
+            <label for="category">Category</label>
+            {{ form.category }}
+          </div>
+
+          <div class="filter-group">
+            <label for="brand">Brand</label>
+            <input type="text" name="brand" class="form-control" placeholder="Brand..." list="brand-list" value="{{ form.brand.value }}">
+            <datalist id="brand-list">
+              {% for brand in brands %}
+                <option value="{{ brand }}">
+              {% endfor %}
+            </datalist>
+          </div>
+
+          <div class="filter-group">
+          <label>Price Range (Rs.)</label>
+            <div class="d-flex">
+              {{ form.min_price }}
+              {{ form.max_price }}
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label for="ram">RAM</label>
+            <input type="text" name="ram" class="form-control" placeholder="RAM..." list="ram-list" value="{{ form.ram.value }}">
+            <datalist id="ram-list">
+              {% for ram in ram_options %}
+                <option value="{{ ram }}">
+              {% endfor %}
+            </datalist>
+          </div>
+
+          <div class="filter-group">
+            <label for="processor">Processor</label>
+            <input type="text" name="processor" class="form-control" placeholder="Processor..." list="processor-list" value="{{ form.processor.value }}">
+            <datalist id="processor-list">
+              {% for processor in processor_options %}
+                <option value="{{ processor }}">
+              {% endfor %}
+            </datalist>
+          </div>
+
+          <div class="filter-group">
+            <label for="min_rating">Rating</label>
+            {{ form.min_rating }}
+          </div>
+
+          <div class="filter-group form-check">
+            {{ form.in_stock_only }}
+            <label class="form-check-label" for="in_stock_only">In Stock Only</label>
+          </div>
+
+          <div class="filter-group form-check">
+            {{ form.featured_only }}
+            <label class="form-check-label" for="featured_only">Featured Products</label>
+          </div>
+
+          <div class="filter-group form-check">
+            {{ form.flash_sale_only }}
+            <label class="form-check-label" for="flash_sale_only">Flash Sale</label>
+          </div>
+
+          <div class="filter-group">
+            <label for="sort_by">Sort By</label>
+            {{ form.sort_by }}
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      {% if has_filters %}
+      <div class="applied-filters">
+        <strong>Applied Filters:</strong>
+        {% for filter in applied_filters %}
+          <span class="filter-badge">{{ filter }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+          <div class="card product-card h-100">
+            <div class="position-relative">
+              <div class="product-badges">
+                {% if product.is_featured %}
+                <span class="badge bg-warning">Featured</span>
+                {% endif %}
+                {% if product.is_flash_sale %}
+                <span class="badge bg-danger">Flash Sale</span>
+                {% endif %}
+              </div>
+              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            </div>
+            <div class="card-body">
+              <div class="card-content">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="text-muted small mb-1">Brand: {{ product.brand }}</p>
+                <div>
+                  <span class="text-primary fw-bold">Rs. {{ product.price|floatformat:0|intcomma }}</span>
+                  {% if product.rating %}
+                  <span class="text-warning small">•
+                    {% for i in "12345" %}
+                      {% if forloop.counter <= product.rating %}
+                        <i class="fas fa-star"></i>
+                      {% else %}
+                        <i class="far fa-star"></i>
+                      {% endif %}
+                    {% endfor %}
+                    ({{ product.review_count }})
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <!-- Stock information -->
+              <div class="stock-badge">
+                {% if product.stock == 0 %}
+                <span class="badge bg-secondary">Out of Stock</span>
+                {% elif product.stock <= 5 %}
+                <span class="badge bg-warning text-dark">Low Stock ({{ product.stock }} left)</span>
+                {% else %}
+                <span class="badge bg-success">In Stock ({{ product.stock }} available)</span>
+                {% endif %}
+              </div>
+              
+              <!-- Fixed button group -->
+              <div class="card-footer">
+                <div class="btn-group">
+                  <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary btn-sm btn-details">
+                    Details
+                  </a>
+                  
+                  {% if user.is_authenticated and user.role == 'buyer' %}
+                  <button class="btn btn-outline-danger btn-sm wishlist-btn" onclick="toggleWishlist({{ product.id }}, this)">
+                    {% if product.id in wishlist_ids %}
+                    <i class="fas fa-heart"></i>
+                    {% else %}
+                    <i class="far fa-heart"></i>
+                    {% endif %}
+                  </button>
+                  {% endif %}
+                </div>
+                
+                {% if product.stock > 0 %}
+                <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary btn-sm w-100 add-to-cart-btn">
+                  Cart
+                </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <div class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No products found</h4>
+            <p class="text-muted">Try adjusting your search criteria or browse all categories.</p>
+            <a href="{% url 'products' %}" class="btn btn-primary">
+              <i class="fas fa-refresh me-2"></i>Show All Products
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if is_paginated %}
+      <div class="d-flex justify-content-center">
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?{% if form.search.value %}search={{ form.search.value }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                Previous
+              </a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            {% if num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+              <a class="page-link" href="?{% if form.search.value %}search={{ form.search.value }}&{% endif %}page={{ num }}">
+                {{ num }}
+              </a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?{% if form.search.value %}search={{ form.search.value }}&{% endif %}page={{ page_obj.next_page_number }}">
+                Next
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+function toggleWishlist(productId, element) {
+    console.log('toggleWishlist called with productId:', productId);
+    
+    // Check if user is authenticated
+    {% if not user.is_authenticated %}
+    alert('Please login to add items to wishlist');
+    window.location.href = '/accounts/login/';
+    return;
+    {% endif %}
+    
+    {% if user.role != 'buyer' %}
+    alert('Only buyers can add items to wishlist');
+    return;
+    {% endif %}
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+    console.log('CSRF Token:', csrfToken ? 'Found' : 'Not found');
+    
+    // Disable button during request
+    element.disabled = true;
+    
+    fetch(`/accounts/wishlist/toggle/${productId}/`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        element.disabled = false;
+        
+        if (data.success) {
+            if (data.status === 'added') {
+                element.innerHTML = '<i class="fas fa-heart"></i>';
+                element.classList.add('active');
+                if (typeof showSuccessToast === 'function') {
+                    showSuccessToast(data.message || 'Added to wishlist');
+                } else {
+                    alert(data.message || 'Added to wishlist');
+                }
+            } else if (data.status === 'removed') {
+                element.innerHTML = '<i class="far fa-heart"></i>';
+                element.classList.remove('active');
+                if (typeof showSuccessToast === 'function') {
+                    showSuccessToast(data.message || 'Removed from wishlist');
+                } else {
+                    alert(data.message || 'Removed from wishlist');
+                }
+            }
+        } else {
+            if (typeof showErrorToast === 'function') {
+                showErrorToast(data.message || 'Failed to update wishlist');
+            } else {
+                alert(data.message || 'Failed to update wishlist');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        element.disabled = false;
+        
+        if (typeof showErrorToast === 'function') {
+            showErrorToast('An error occurred while updating wishlist');
+        } else {
+            alert('An error occurred while updating wishlist: ' + error.message);
+        }
+    });
+}
+</script>
+{% endblock %}
+

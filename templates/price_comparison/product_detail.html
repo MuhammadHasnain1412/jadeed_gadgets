@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Price Comparison{% endblock %}
+
+{% block extra_css %}
+<style>
+    .comparison-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .competitor-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    .price-badge {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    .price-difference.positive {
+        color: #dc3545;
+    }
+    .price-difference.negative {
+        color: #28a745;
+    }
+    .confidence-bar {
+        height: 6px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    .confidence-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+        transition: width 0.3s ease;
+    }
+    .product-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+    }
+    .similar-products {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <!-- Back Button -->
+            <div class="mb-3">
+                <a href="{% url 'price_comparison:dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+            
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'price_comparison:dashboard' %}">Price Comparison</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'price_comparison:product_list' %}">Products</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+                </ol>
+            </nav>
+            <h2><i class="fas fa-laptop"></i> {{ product.name }}</h2>
+            <p class="text-muted">Detailed price comparison analysis</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Product Information -->
+        <div class="col-md-4">
+            <div class="comparison-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Product Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="product-info">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid mb-3" style="max-height: 200px;">
+                        {% endif %}
+                        
+                        <h6><strong>{{ product.name }}</strong></h6>
+                        <p><strong>Category:</strong> {{ product.get_category_display }}</p>
+                        <p><strong>Brand:</strong> {{ product.brand }}</p>
+                        <p><strong>Your Price:</strong> <span class="price-badge text-primary">Rs. {{ product.price|floatformat:0 }}</span></p>
+                        
+                        {% if product.description %}
+                        <p><strong>Description:</strong></p>
+                        <p class="text-muted">{{ product.description|truncatewords:20 }}</p>
+                        {% endif %}
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> Last updated: {{ comparison.last_compared|timesince }} ago
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Refresh Button -->
+            <button id="refresh-comparison" class="btn btn-success btn-block mb-3">
+                <i class="fas fa-sync-alt"></i> Refresh Comparison
+            </button>
+        </div>
+
+        <!-- Comparison Results -->
+        <div class="col-md-8">
+            <div class="comparison-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Price Comparison Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- PriceOye -->
+                        <div class="col-md-6">
+                            <div class="competitor-card">
+                                <h6><i class="fas fa-store"></i> PriceOye</h6>
+                                
+                                {% if comparison.best_priceoye_match %}
+                                    <div class="mb-3">
+                                        <strong>{{ comparison.best_priceoye_match.title }}</strong>
+                                        <br>
+                                        <span class="price-badge text-info">Rs. {{ comparison.best_priceoye_match.price|floatformat:0 }}</span>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-external-link-alt"></i> 
+                                            <a href="{{ comparison.best_priceoye_match.url }}" target="_blank">View on PriceOye</a>
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="small text-muted">Price Difference:</label>
+                                        <div class="price-difference {% if comparison.priceoye_price_difference > 0 %}positive{% else %}negative{% endif %}">
+                                            {% if comparison.priceoye_price_difference > 0 %}
+                                                <i class="fas fa-arrow-up"></i> +Rs. {{ comparison.priceoye_price_difference|floatformat:0 }}
+                                                <small>(You're Rs. {{ comparison.priceoye_price_difference|floatformat:0 }} more expensive)</small>
+                                            {% elif comparison.priceoye_price_difference < 0 %}
+                                                <i class="fas fa-arrow-down"></i> Rs. {{ comparison.priceoye_price_difference|floatformat:0 }}
+                                                <small>(You're Rs. {{ comparison.priceoye_price_difference|floatformat:0|slice:"1:" }} cheaper)</small>
+                                            {% else %}
+                                                <i class="fas fa-equals"></i> Same price
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <label class="small text-muted">Match Confidence:</label>
+                                        <div class="confidence-bar">
+                                            <div class="confidence-fill" style="width: {{ comparison.match_confidence_priceoye|floatformat:0 }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ comparison.match_confidence_priceoye|floatformat:1 }}%</small>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-search text-muted" style="font-size: 2rem;"></i>
+                                        <p class="text-muted">No matching product found</p>
+                                        <small>Try adjusting your product name for better matching</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- PakLap -->
+                        <div class="col-md-6">
+                            <div class="competitor-card">
+                                <h6><i class="fas fa-store"></i> PakLap</h6>
+                                
+                                {% if comparison.best_paklap_match %}
+                                    <div class="mb-3">
+                                        <strong>{{ comparison.best_paklap_match.title }}</strong>
+                                        <br>
+                                        <span class="price-badge text-info">Rs. {{ comparison.best_paklap_match.price|floatformat:0 }}</span>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-external-link-alt"></i> 
+                                            <a href="{{ comparison.best_paklap_match.url }}" target="_blank">View on PakLap</a>
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="small text-muted">Price Difference:</label>
+                                        <div class="price-difference {% if comparison.paklap_price_difference > 0 %}positive{% else %}negative{% endif %}">
+                                            {% if comparison.paklap_price_difference > 0 %}
+                                                <i class="fas fa-arrow-up"></i> +Rs. {{ comparison.paklap_price_difference|floatformat:0 }}
+                                                <small>(You're Rs. {{ comparison.paklap_price_difference|floatformat:0 }} more expensive)</small>
+                                            {% elif comparison.paklap_price_difference < 0 %}
+                                                <i class="fas fa-arrow-down"></i> Rs. {{ comparison.paklap_price_difference|floatformat:0 }}
+                                                <small>(You're Rs. {{ comparison.paklap_price_difference|floatformat:0|slice:"1:" }} cheaper)</small>
+                                            {% else %}
+                                                <i class="fas fa-equals"></i> Same price
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <label class="small text-muted">Match Confidence:</label>
+                                        <div class="confidence-bar">
+                                            <div class="confidence-fill" style="width: {{ comparison.match_confidence_paklap|floatformat:0 }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ comparison.match_confidence_paklap|floatformat:1 }}%</small>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-search text-muted" style="font-size: 2rem;"></i>
+                                        <p class="text-muted">No matching product found</p>
+                                        <small>Try adjusting your product name for better matching</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Similar Products -->
+            {% if similar_priceoye or similar_paklap %}
+            <div class="comparison-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> Similar Products</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if similar_priceoye %}
+                        <div class="col-md-6">
+                            <h6>PriceOye</h6>
+                            <div class="similar-products">
+                                {% for product in similar_priceoye %}
+                                <div class="border-bottom py-2">
+                                    <small>
+                                        <strong>{{ product.title|truncatewords:8 }}</strong><br>
+                                        <span class="text-info">Rs. {{ product.price|floatformat:0 }}</span>
+                                        <a href="{{ product.url }}" target="_blank" class="ml-2">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if similar_paklap %}
+                        <div class="col-md-6">
+                            <h6>PakLap</h6>
+                            <div class="similar-products">
+                                {% for product in similar_paklap %}
+                                <div class="border-bottom py-2">
+                                    <small>
+                                        <strong>{{ product.title|truncatewords:8 }}</strong><br>
+                                        <span class="text-info">Rs. {{ product.price|floatformat:0 }}</span>
+                                        <a href="{{ product.url }}" target="_blank" class="ml-2">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">Refreshing comparison...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Refresh comparison
+    $('#refresh-comparison').click(function() {
+        $('#loadingModal').modal('show');
+        
+        $.ajax({
+            url: '{% url "price_comparison:refresh_product" product.id %}',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                $('#loadingModal').modal('hide');
+                if (response.success) {
+                    // Show success message and reload page
+                    alert('Comparison updated successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (response.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr) {
+                $('#loadingModal').modal('hide');
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    alert('Error: ' + (response.error || 'Unknown error'));
+                } catch (e) {
+                    alert('Error occurred while updating comparison');
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

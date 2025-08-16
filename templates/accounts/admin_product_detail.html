@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Admin - Product Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>📦 Product Details</h2>
+                <div>
+                    <a href="{% url 'admin_products' %}" class="btn btn-secondary">← Back to Products</a>
+                    <button type="button" class="btn btn-danger" 
+                            onclick="showDeleteModal('{{ product.id }}', '{{ product.name|escapejs }}')">
+                        <i class="fas fa-trash"></i> Delete Product
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Product Information -->
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Product Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                                             class="img-fluid rounded shadow-sm">
+                                    {% else %}
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                             style="height: 200px;">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-8">
+                                    <h3>{{ product.name }}</h3>
+                                    <p class="text-muted mb-3">{{ product.description }}</p>
+                                    
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <strong>Price:</strong> PKR {{ product.price|floatformat:2|intcomma }}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <strong>Stock:</strong> 
+                                            {% if product.stock > 0 %}
+                                                <span class="text-success">{{ product.stock }} in stock</span>
+                                            {% else %}
+                                                <span class="text-danger">Out of Stock</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-sm-6 mt-2">
+                                            <strong>Category:</strong> {{ product.category|default:"Uncategorized" }}
+                                        </div>
+                                        <div class="col-sm-6 mt-2">
+                                            <strong>Brand:</strong> {{ product.brand }}
+                                        </div>
+                                        <div class="col-sm-6 mt-2">
+                                            <strong>Status:</strong> 
+                                            {% if product.is_active %}
+                                                <span class="badge badge-success">Active</span>
+                                            {% else %}
+                                                <span class="badge badge-danger">Inactive</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-sm-6 mt-2">
+                                            <strong>Featured:</strong> 
+                                            {% if product.is_featured %}
+                                                <span class="badge badge-primary">Featured</span>
+                                            {% else %}
+                                                <span class="badge badge-secondary">Not Featured</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    {% if product.ram or product.processor or product.storage or product.screen_size %}
+                                        <hr>
+                                        <h6>Specifications:</h6>
+                                        <div class="row">
+                                            {% if product.ram %}
+                                                <div class="col-sm-6">
+                                                    <strong>RAM:</strong> {{ product.ram }}
+                                                </div>
+                                            {% endif %}
+                                            {% if product.processor %}
+                                                <div class="col-sm-6">
+                                                    <strong>Processor:</strong> {{ product.processor }}
+                                                </div>
+                                            {% endif %}
+                                            {% if product.storage %}
+                                                <div class="col-sm-6 mt-1">
+                                                    <strong>Storage:</strong> {{ product.storage }}
+                                                </div>
+                                            {% endif %}
+                                            {% if product.screen_size %}
+                                                <div class="col-sm-6 mt-1">
+                                                    <strong>Screen Size:</strong> {{ product.screen_size }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <strong>Created:</strong> {{ product.created_at|date:"M d, Y H:i" }}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <strong>Updated:</strong> {{ product.updated_at|date:"M d, Y H:i" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seller Information -->
+                    {% if product.seller %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Seller Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <strong>Seller:</strong> {{ product.seller.username }}
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Email:</strong> {{ product.seller.email }}
+                                </div>
+                                <div class="col-sm-6 mt-2">
+                                    <strong>Joined:</strong> {{ product.seller.date_joined|date:"M d, Y" }}
+                                </div>
+                                <div class="col-sm-6 mt-2">
+                                    <strong>Total Products:</strong> {{ product.seller.products.count }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Statistics and Orders -->
+                <div class="col-md-4">
+                    <!-- Sales Statistics -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Sales Statistics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <h3 class="text-primary">{{ total_sold }}</h3>
+                                <p class="text-muted mb-0">Units Sold</p>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-6 text-center">
+                                    <h5 class="text-success">PKR {{ total_revenue|floatformat:2|intcomma }}</h5>
+                                    <small class="text-muted">Total Revenue</small>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <h5 class="text-info">{{ total_orders }}</h5>
+                                    <small class="text-muted">Total Orders</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    {% if recent_orders %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Recent Orders</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                {% for order_item in recent_orders %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>{{ order_item.order.user.username }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ order_item.order.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                        <div class="text-right">
+                                            <div>Qty: {{ order_item.quantity }}</div>
+                                            <small class="text-success">PKR {{ order_item.price|floatformat:2|intcomma }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Product Modal (same as in admin_products.html) -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" role="dialog" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteProductModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Delete Product
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="deleteProductForm" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Warning:</strong> This action cannot be undone!
+                    </div>
+                    
+                    <p>Are you sure you want to delete the product: <strong id="productName"></strong>?</p>
+                    
+                    <div class="form-group">
+                        <label for="danger_reason">Reason for Deletion *</label>
+                        <select class="form-control" name="danger_reason" required>
+                            <option value="">Select a reason...</option>
+                            <option value="fraud">Fraudulent Activity</option>
+                            <option value="spam">Spam/Inappropriate Content</option>
+                            <option value="fake_products">Fake/Counterfeit Products</option>
+                            <option value="scam">Scam Activities</option>
+                            <option value="violation">Terms of Service Violation</option>
+                            <option value="security_threat">Security Threat</option>
+                            <option value="harmful_content">Harmful Content</option>
+                            <option value="illegal_activity">Illegal Activity</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea class="form-control" name="description" rows="3" 
+                                  placeholder="Provide a detailed description of why this product is being deleted..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evidence">Evidence (Optional)</label>
+                        <textarea class="form-control" name="evidence" rows="2" 
+                                  placeholder="URLs, screenshots, or other evidence..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDeleteModal(productId, productName) {
+    // Set the product name in the modal
+    document.getElementById('productName').textContent = productName;
+    
+    // Set the form action URL
+    document.getElementById('deleteProductForm').action = '/accounts/admin/delete-product/' + productId + '/';
+    
+    // Show the modal using Bootstrap 5
+    var modal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
+    modal.show();
+}
+</script>
+
+{% endblock %}

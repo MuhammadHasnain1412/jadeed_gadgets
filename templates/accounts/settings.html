@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="user-settings">
+    <h2>Account Settings</h2>
+    <div class="settings-card">
+        <div class="settings-group">
+            <h3>Profile Information</h3>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Account Type:</strong> {{ user.get_role_display }}</p>
+        </div>
+        <div class="settings-group">
+            <h3>Security</h3>
+            <a href="#" class="settings-action">Change Password</a>
+        </div>
+        <div class="settings-group">
+            <h3>Preferences</h3>
+            <a href="#" class="settings-action">Notification Settings</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

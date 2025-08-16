@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Create Account</h2>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_username">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <ul class="errorlist">
+                    {% for error in form.username.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_email">Email</label>
+            {{ form.email }}
+        </div>
+        
+        <!-- Role Selection -->
+        <div class="form-group">
+            <label>Account Type</label>
+            {{ form.role }}
+            
+        </div>
+        
+        <div class="form-group">
+            <label for="id_password1">Password</label>
+            {{ form.password1 }}
+            <small id="passwordHelpBlock" class="form-text text-muted">
+                Your password must be 8-20 characters long, contain letters and numbers, and should include special characters for better security.
+            </small>
+            <!-- Password Strength Indicator -->
+            <div class="mt-2">
+                <div class="progress" style="height: 5px;">
+                    <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                </div>
+                <small id="strengthText" class="form-text"></small>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="id_password2">Confirm Password</label>
+            {{ form.password2 }}
+            <div id="passwordMatchStatus" class="mt-1"></div>
+        </div>
+        
+        <button type="submit" class="btn auth-btn">Register</button>
+    </form>
+    <p class="auth-link">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+</div>
+
+<script>
+    let passwordToastTimeout = null;
+    let lastPasswordStrength = -1;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Password strength validation
+        document.getElementById('id_password1').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('passwordStrength');
+            const strengthText = document.getElementById('strengthText');
+            let strength = 0;
+            let suggestions = [];
+            
+            // Check password criteria
+            if (password.length >= 8) { 
+                strength += 1; 
+            } else {
+                suggestions.push('At least 8 characters');
+            }
+            
+            if (password.match(/[a-z]+/)) { 
+                strength += 1; 
+            } else {
+                suggestions.push('Lowercase letters');
+            }
+            
+            if (password.match(/[A-Z]+/)) { 
+                strength += 1; 
+            } else {
+                suggestions.push('Uppercase letters');
+            }
+            
+            if (password.match(/[0-9]+/)) { 
+                strength += 1; 
+            } else {
+                suggestions.push('Numbers');
+            }
+            
+            if (password.match(/[$@#&!]+/)) { 
+                strength += 1; 
+            } else {
+                suggestions.push('Special characters (@#$&!)');
+            }
+
+            // Update strength indicator
+            switch (strength) {
+                case 0:
+                case 1:
+                    strengthBar.style.width = '20%';
+                    strengthBar.className = 'progress-bar bg-danger';
+                    strengthText.innerHTML = '<span style="color: red;">Very Weak</span>';
+                    // Only show toast if strength changed and password has content
+                    if (password.length > 0 && strength !== lastPasswordStrength && suggestions.length > 0) {
+                        clearTimeout(passwordToastTimeout);
+                        passwordToastTimeout = setTimeout(() => {
+                            showWarningToast('Password needs: ' + suggestions.join(', '), 3000);
+                        }, 1000); // Wait 1 second before showing toast
+                    }
+                    break;
+                case 2:
+                    strengthBar.style.width = '40%';
+                    strengthBar.className = 'progress-bar bg-danger';
+                    strengthText.innerHTML = '<span style="color: red;">Weak</span>';
+                    break;
+                case 3:
+                    strengthBar.style.width = '60%';
+                    strengthBar.className = 'progress-bar bg-warning';
+                    strengthText.innerHTML = '<span style="color: orange;">Moderate</span>';
+                    break;
+                case 4:
+                    strengthBar.style.width = '80%';
+                    strengthBar.className = 'progress-bar bg-info';
+                    strengthText.innerHTML = '<span style="color: blue;">Good</span>';
+                    break;
+                case 5:
+                    strengthBar.style.width = '100%';
+                    strengthBar.className = 'progress-bar bg-success';
+                    strengthText.innerHTML = '<span style="color: green;">Strong</span>';
+                    // Only show success toast once when reaching strong
+                    if (strength !== lastPasswordStrength) {
+                        clearTimeout(passwordToastTimeout);
+                        showSuccessToast('Great! Your password is strong.', 2000);
+                    }
+                    break;
+                default:
+                    strengthBar.style.width = '0%';
+                    strengthText.textContent = '';
+                    clearTimeout(passwordToastTimeout);
+            }
+            
+            lastPasswordStrength = strength;
+        });
+
+        // Password confirmation validation
+        document.getElementById('id_password2').addEventListener('input', function() {
+            const password1 = document.getElementById('id_password1').value;
+            const password2 = this.value;
+            const matchStatus = document.getElementById('passwordMatchStatus');
+
+            if (password2.length === 0) {
+                matchStatus.innerHTML = '';
+            } else if (password1 === password2) {
+                matchStatus.innerHTML = '<small style="color: green;"><i class="fas fa-check"></i> Passwords match</small>';
+            } else {
+                matchStatus.innerHTML = '<small style="color: red;"><i class="fas fa-times"></i> Passwords do not match</small>';
+            }
+        });
+
+        // Form submission validation
+        document.querySelector('.auth-form').addEventListener('submit', function(e) {
+            const password1 = document.getElementById('id_password1').value;
+            const password2 = document.getElementById('id_password2').value;
+            
+            if (password1 !== password2) {
+                e.preventDefault();
+                showErrorToast('Passwords do not match!', 4000);
+                return false;
+            }
+            
+            if (password1.length < 8) {
+                e.preventDefault();
+                showErrorToast('Password must be at least 8 characters long!', 4000);
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}

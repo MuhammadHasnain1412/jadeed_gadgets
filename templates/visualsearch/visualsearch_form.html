@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Visual Search</h2>
+    <p>Upload an image to find similar products in our catalog.</p>
+    
+    <form method="post" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="query_image">Choose an image:</label>
+            <input type="file" id="query_image" name="query_image" accept="image/*" required class="form-control-file">
+        </div>
+        <button type="submit" class="btn btn-primary">Search Similar Products</button>
+    </form>
+</div>
+{% endblock %}

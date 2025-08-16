@@ -1,0 +1,585 @@
+<!-- JadeedBot Chatbox -->
+<div id="chatbot-container" class="chatbot-container">
+    <!-- Chat Toggle Button -->
+    <button id="chat-toggle" class="chat-toggle-btn" title="Chat with JadeedBot">
+        <i class="fas fa-comments"></i>
+        <span class="chat-badge" id="chat-notification" style="display: none;"></span>
+    </button>
+
+    <!-- Chat Window -->
+    <div id="chat-window" class="chat-window">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="chat-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-info">
+                    <h6 class="mb-0">JadeedBot</h6>
+                    <small class="text-muted">Customer Support</small>
+                </div>
+            </div>
+            <button id="chat-close" class="chat-close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat-messages" class="chat-messages">
+            <!-- Welcome Message -->
+            <div class="message bot-message">
+                <div class="message-content">
+                    <i class="fas fa-robot message-icon"></i>
+                    <div class="message-text">
+                        <p>Assalamualaikum! Welcome to Jadeed Gadgets! 👋</p>
+                        <p>I'm JadeedBot, your shopping assistant. How can I help you today?</p>
+                    </div>
+                </div>
+                <div class="message-time">Just now</div>
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input">
+            <div class="input-group">
+                <input type="text" id="chat-input-field" class="form-control" 
+                       placeholder="Type your message..." maxlength="500">
+                <button id="chat-send" class="btn btn-primary" type="button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="chat-suggestions">
+                <button class="suggestion-btn" data-message="How to track my order?">Track Order</button>
+                <button class="suggestion-btn" data-message="What are your payment methods?">Payment Methods</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    font-family: 'Inter', sans-serif;
+}
+
+.chat-toggle-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-toggle-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+.chat-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.chat-window {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-header {
+    background: #a48082;
+    color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.chat-info h6 {
+    color: white;
+    margin: 0;
+    font-weight: 600;
+}
+
+.chat-info small {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
+}
+
+.chat-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.chat-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+}
+
+.bot-message {
+    align-self: flex-start;
+}
+
+.user-message {
+    align-self: flex-end;
+}
+
+.message-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.message-icon {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.user-message .message-icon {
+    background: #28a745;
+}
+
+.message-text {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    line-height: 1.4;
+}
+
+.user-message .message-text {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.message-text p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.message-text p:not(:last-child) {
+    margin-bottom: 8px;
+}
+
+.message-time {
+    font-size: 11px;
+    color: #6c757d;
+    margin-top: 4px;
+    padding-left: 33px;
+}
+
+.user-message .message-time {
+    text-align: right;
+    padding-left: 0;
+    padding-right: 33px;
+}
+
+.chat-input {
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #e9ecef;
+}
+
+.chat-input .input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.chat-input .form-control {
+    flex: 1;
+    border: 2px solid #e9ecef;
+    border-radius: 25px;
+    padding: 10px 15px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.chat-input .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    outline: none;
+}
+
+.chat-input .btn {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transition: all 0.3s ease;
+}
+
+.chat-input .btn:hover {
+    transform: scale(1.1);
+}
+
+.chat-input .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.chat-suggestions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.suggestion-btn {
+    background: #a48082;
+    border: 1px solid #e9ecef;
+    border-radius: 15px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #6c757d;
+}
+
+.suggestion-btn:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #667eea;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .chat-window {
+        width: 300px;
+        height: 450px;
+    }
+    
+    .chatbot-container {
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .chat-toggle-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
+
+/* Scrollbar Styling */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #5a6fd8;
+}
+</style>
+
+<script>
+window.addEventListener('load', function() {
+    console.log('JadeedBot: Initializing...');
+    
+    const chatToggle = document.getElementById('chat-toggle');
+    const chatWindow = document.getElementById('chat-window');
+    const chatClose = document.getElementById('chat-close');
+    const chatInput = document.getElementById('chat-input-field');
+    const chatSend = document.getElementById('chat-send');
+    const chatMessages = document.getElementById('chat-messages');
+    const suggestionBtns = document.querySelectorAll('.suggestion-btn');
+    
+    if (!chatToggle || !chatWindow || !chatClose) {
+        console.error('JadeedBot: Required elements not found!');
+        return;
+    }
+    
+    let isOpen = false;
+    
+    chatToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('JadeedBot: Toggle clicked');
+        if (isOpen) {
+            chatWindow.style.display = 'none';
+            isOpen = false;
+        } else {
+            chatWindow.style.display = 'flex';
+            isOpen = true;
+            if (chatInput) chatInput.focus();
+        }
+    });
+    
+    chatClose.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('JadeedBot: Close clicked');
+        chatWindow.style.display = 'none';
+        isOpen = false;
+    });
+    
+    if (chatInput) {
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
+    
+    if (chatSend) {
+        chatSend.addEventListener('click', sendMessage);
+    }
+    
+    suggestionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const message = this.dataset.message;
+            if (chatInput) chatInput.value = message;
+            sendMessage();
+        });
+    });
+    
+    function sendMessage() {
+        if (!chatInput || !chatMessages) return;
+        
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        chatInput.value = '';
+        addMessage(message, 'user');
+        showTypingIndicator();
+        
+        fetch('/chatbot-response/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideTypingIndicator();
+            if (data.success) {
+                addMessage(data.response, 'bot');
+            } else {
+                addMessage(data.response || 'Sorry, I encountered an error. Please try again.', 'bot');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideTypingIndicator();
+            addMessage('Assalamualaikum! I am having trouble connecting. Please try again in a moment. Shukriya!', 'bot');
+        });
+    }
+    
+    function addMessage(message, sender) {
+        if (!chatMessages) return;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ' + sender + '-message';
+        
+        const now = new Date();
+        const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        const iconClass = sender === 'user' ? 'user' : 'robot';
+        
+        messageDiv.innerHTML = '<div class="message-content">' +
+            '<div class="message-icon">' +
+            '<i class="fas fa-' + iconClass + '"></i>' +
+            '</div>' +
+            '<div class="message-text">' +
+            '<p>' + message + '</p>' +
+            '</div>' +
+            '</div>' +
+            '<div class="message-time">' + timeString + '</div>';
+        
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function showTypingIndicator() {
+        if (!chatMessages) return;
+        
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message bot-message typing-indicator-message';
+        typingDiv.innerHTML = '<div class="message-content">' +
+            '<div class="message-icon">' +
+            '<i class="fas fa-robot"></i>' +
+            '</div>' +
+            '<div class="typing-indicator">' +
+            '<span>JadeedBot is typing</span>' +
+            '<div class="typing-dots">' +
+            '<div class="typing-dot"></div>' +
+            '<div class="typing-dot"></div>' +
+            '<div class="typing-dot"></div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+        
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function hideTypingIndicator() {
+        const typingIndicator = document.querySelector('.typing-indicator-message');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    console.log('JadeedBot: Initialization complete!');
+});
+</script>

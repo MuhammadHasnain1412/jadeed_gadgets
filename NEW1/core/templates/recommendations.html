@@ -1,0 +1,34 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Category Recommendations</title>
+</head>
+<body>
+    {% if message %}
+    <div class="alert alert-info">{{ message }}</div>
+    {% endif %}
+
+    <h1>Recommendations for {{ category }}</h1>
+    <p>This is a test template for category: {{ category }}.</p>
+
+    <div class="products">
+        {% for product in products %}
+        <div class="product">
+            <h2>{{ product.name }}</h2>
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" width="200">
+            {% else %}
+                <p>No image available</p>
+            {% endif %}
+            <p>Specs: {{ product.specs }}</p>
+            <p>Price: ${{ product.price }}</p>
+        </div>
+        {% empty %}
+        <p>No recommendations available. Try interacting with more products!</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

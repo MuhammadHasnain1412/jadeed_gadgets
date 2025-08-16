@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}My Wishlist - Jadeed Gadgets{% endblock %}
+
+{% block extra_css %}
+<style>
+.wishlist-remove-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.wishlist-remove-btn:hover {
+    background-color: #dc3545 !important;
+    transform: scale(1.1);
+}
+
+.wishlist-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.wishlist-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-heart text-danger"></i> My Wishlist</h2>
+                <div>
+                    <span class="badge badge-primary">{{ wishlist_count }} item{{ wishlist_count|pluralize }}</span>
+                    <a href="/" class="btn btn-outline-primary ml-2">
+                        <i class="fas fa-shopping-bag"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if wishlist %}
+        <div class="row">
+            {% for product in wishlist %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card wishlist-card h-100">
+                    <div class="position-relative">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Wishlist Remove Button -->
+                        <a href="#" 
+                           class="btn btn-sm btn-danger wishlist-remove-btn"
+                           title="Remove from wishlist"
+                           data-product-id="{{ product.id }}"
+                           data-product-name="{{ product.name }}"
+                           onclick="removeFromWishlist(this, event)">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text text-muted mb-2">{{ product.brand }}</p>
+                        
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="text-primary mb-0">Rs. {{ product.price|floatformat:0|intcomma }}</h4>
+                                {% if product.stock > 0 %}
+                                    <span class="badge badge-success">In Stock ({{ product.stock }})</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Out of Stock</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="btn-group w-100" role="group">
+                                <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                {% if product.stock > 0 %}
+                                <form method="post" action="{% url 'add_to_cart' product.id %}" class="d-inline flex-fill">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                </form>
+                                {% else %}
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="fas fa-ban"></i> Out of Stock
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Wishlist Actions -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="{% url 'cart' %}" class="btn btn-primary mr-2">
+                    <i class="fas fa-shopping-cart"></i> View Cart
+                </a>
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="fas fa-plus"></i> Add More Items
+                </a>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Empty Wishlist -->
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-heart-broken fa-5x text-muted mb-4"></i>
+                    <h3 class="text-muted">Your wishlist is empty</h3>
+                    <p class="text-muted mb-4">Add some products you love to your wishlist!</p>
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag"></i> Start Shopping
+                    </a>
+                    <a href="{% url 'cart' %}" class="btn btn-outline-secondary ml-2">
+                        <i class="fas fa-shopping-cart"></i> View Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function removeFromWishlist(button, event) {
+    event.preventDefault();
+    
+    const productId = button.getAttribute('data-product-id');
+    const productName = button.getAttribute('data-product-name');
+    const card = button.closest('.wishlist-card');
+    
+    // Show loading state
+    const originalHtml = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
+    
+    // Make AJAX request to remove from wishlist
+    fetch(`/accounts/wishlist/remove/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success toast
+            showSuccessToast(`${productName} removed from wishlist`);
+            
+            // Animate card removal
+            card.style.transition = 'all 0.3s ease';
+            card.style.transform = 'scale(0.8)';
+            card.style.opacity = '0';
+            
+            setTimeout(() => {
+                card.remove();
+                
+                // Update wishlist count
+                const countBadge = document.querySelector('.badge-primary');
+                if (countBadge) {
+                    const currentCount = parseInt(countBadge.textContent.split(' ')[0]);
+                    const newCount = currentCount - 1;
+                    countBadge.textContent = `${newCount} item${newCount !== 1 ? 's' : ''}`;
+                    
+                    // If no items left, show empty state
+                    if (newCount === 0) {
+                        setTimeout(() => {
+                            // Hide the wishlist grid and show empty state
+                            const wishlistGrid = document.querySelector('.row:has(.wishlist-card)');
+                            const emptyStateHtml = `
+                                <div class="col-12">
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-heart-broken fa-5x text-muted mb-4"></i>
+                                        <h3 class="text-muted">Your wishlist is empty</h3>
+                                        <p class="text-muted mb-4">Add some products you love to your wishlist!</p>
+                                        <a href="/" class="btn btn-primary">
+                                            <i class="fas fa-shopping-bag"></i> Start Shopping
+                                        </a>
+                                        <a href="{% url 'cart' %}" class="btn btn-outline-secondary ml-2">
+                                            <i class="fas fa-shopping-cart"></i> View Cart
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                            if (wishlistGrid) {
+                                wishlistGrid.innerHTML = emptyStateHtml;
+                            }
+                        }, 1000);
+                    }
+                }
+            }, 300);
+        } else {
+            // Show error toast
+            showToast(data.message || 'Failed to remove item from wishlist', 'error');
+            
+            // Restore button
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred while removing item from wishlist', 'error');
+        
+        // Restore button
+        button.innerHTML = originalHtml;
+        button.disabled = false;
+    });
+}
+
+// Function to refresh wishlist data dynamically
+function refreshWishlistData() {
+    fetch('/accounts/wishlist/', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Parse the HTML to extract the wishlist content
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Get the new wishlist content
+        const newWishlistContent = doc.querySelector('.container.mt-4');
+        const currentContainer = document.querySelector('.container.mt-4');
+        
+        if (newWishlistContent && currentContainer) {
+            // Update the entire container content
+            currentContainer.innerHTML = newWishlistContent.innerHTML;
+        }
+    })
+    .catch(error => {
+        console.error('Error refreshing wishlist:', error);
+    });
+}
+
+// Listen for wishlist updates from other pages
+window.addEventListener('storage', function(e) {
+    if (e.key === 'wishlistUpdated' && e.newValue === 'true') {
+        // Small delay to ensure backend has processed the change
+        setTimeout(() => {
+            refreshWishlistData();
+        }, 500);
+        
+        // Clear the flag
+        localStorage.removeItem('wishlistUpdated');
+    }
+});
+
+// Check for updates when the page becomes visible again
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        // Check if wishlist was updated while page was hidden
+        const lastUpdate = localStorage.getItem('wishlistLastUpdate');
+        const pageLoadTime = sessionStorage.getItem('wishlistPageLoadTime');
+        
+        if (lastUpdate && pageLoadTime && parseInt(lastUpdate) > parseInt(pageLoadTime)) {
+            refreshWishlistData();
+            sessionStorage.setItem('wishlistPageLoadTime', Date.now().toString());
+        }
+    }
+});
+
+// Set page load time
+sessionStorage.setItem('wishlistPageLoadTime', Date.now().toString());
+
+</script>
+
+{% endblock %}

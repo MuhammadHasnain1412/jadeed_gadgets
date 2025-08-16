@@ -1,0 +1,152 @@
+{% extends 'seller/base.html' %}
+
+{% block title %}Orders - Seller Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-shopping-cart me-2"></i>My Orders</h2>
+                <div>
+                    <select class="form-select" onchange="filterByStatus(this.value)">
+                        <option value="">All Orders</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Product</th>
+                                        <th>Customer</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order_item in orders %}
+                                    <tr>
+                                        <td>#{{ order_item.order.id }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ order_item.product.image.url }}" alt="{{ order_item.product.name }}" 
+                                                     class="me-2" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                <div>
+                                                    <div class="fw-bold">{{ order_item.product.name|truncatechars:30 }}</div>
+                                                    <small class="text-muted">{{ order_item.product.brand }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <div class="fw-bold">{{ order_item.order.customer_name }}</div>
+                                                <small class="text-muted">{{ order_item.order.phone_number }}</small>
+                                            </div>
+                                        </td>
+                                        <td>{{ order_item.quantity }}</td>
+                                        <td>PKR {{ order_item.price }}</td>
+                                        <td class="fw-bold">PKR {{ order_item.total_price }}</td>
+                                        <td>
+                                            <span class="badge {% if order_item.order.status == 'pending' %}bg-warning{% elif order_item.order.status == 'processing' %}bg-info{% elif order_item.order.status == 'shipped' %}bg-primary{% elif order_item.order.status == 'delivered' %}bg-success{% else %}bg-secondary{% endif %}">
+                                                {{ order_item.order.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ order_item.order.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Update Status
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    {% for value, label in status_choices %}
+                                                        {% if value != order_item.order.status %}
+                                                        <li>
+                                                            <form method="post" action="{% url 'update_order_status' order_item.order.id %}" class="d-inline">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="status" value="{{ value }}">
+                                                                <button type="submit" class="dropdown-item">{{ label }}</button>
+                                                            </form>
+                                                        </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <nav aria-label="Orders pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{% if current_status %}status={{ current_status }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                                    </li>
+                                {% endif %}
+                                
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                    </span>
+                                </li>
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{% if current_status %}status={{ current_status }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No orders found</h4>
+                            <p class="text-muted">You haven't received any orders yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterByStatus(status) {
+    const url = new URL(window.location);
+    if (status) {
+        url.searchParams.set('status', status);
+    } else {
+        url.searchParams.delete('status');
+    }
+    window.location = url;
+}
+</script>
+{% endblock %}

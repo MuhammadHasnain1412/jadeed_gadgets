@@ -1,0 +1,202 @@
+{% extends 'seller/base.html' %}
+
+{% block title %}Sales Analytics - Seller Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chart-bar me-2"></i>Sales Analytics</h2>
+                <div>
+                    <select class="form-select" onchange="changePeriod(this.value)">
+                        <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 Days</option>
+                        <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 Days</option>
+                        <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 Days</option>
+                        <option value="365" {% if days == 365 %}selected{% endif %}>Last Year</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-6 col-md-6 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="h3 mb-0">{{ total_sales }}</div>
+                            <div class="small">Total Sales ({{ days }} days)</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-cart fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 col-md-6 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="h3 mb-0">PKR {{ total_revenue|floatformat:0 }}</div>
+                            <div class="small">Total Revenue ({{ days }} days)</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sales Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Daily Sales Trend</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Best Selling Products -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Best Selling Products</h5>
+                </div>
+                <div class="card-body">
+                    {% if best_products %}
+                        {% for product in best_products %}
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                                 class="me-3" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                            <div class="flex-grow-1">
+                                <div class="fw-bold small">{{ product.name|truncatechars:25 }}</div>
+                                <small class="text-muted">{{ product.total_sold }} sold</small>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-success fw-bold">PKR {{ product.price }}</small>
+                            </div>
+                        </div>
+                        {% if not forloop.last %}<hr class="my-2">{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-chart-bar fa-2x text-muted mb-2"></i>
+                            <p class="text-muted small">No sales data available for this period.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Insights -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Performance Insights</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-calendar-day fa-2x text-primary mb-2"></i>
+                            <h6>Average Daily Sales</h6>
+                            <p class="text-muted">{{ total_sales|floatformat:1 }} orders per day</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-money-bill-wave fa-2x text-success mb-2"></i>
+                            <h6>Average Order Value</h6>
+                            <p class="text-muted">
+                                {% if total_sales > 0 %}
+                                    {% widthratio total_revenue total_sales 1 %} PKR
+                                {% else %}
+                                    PKR 0
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
+                            <h6>Top Category</h6>
+                            <p class="text-muted">
+                                {% if best_products %}
+                                    {{ best_products.0.get_category_display }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Daily Sales Chart
+const dailySalesData = {{ daily_sales|safe }};
+const ctx = document.getElementById('salesChart').getContext('2d');
+const salesChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: dailySalesData.map(item => {
+            const date = new Date(item.date);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }),
+        datasets: [{
+            label: 'Daily Sales',
+            data: dailySalesData.map(item => item.sales),
+            borderColor: 'rgb(54, 162, 235)',
+            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+            tension: 0.1,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return 'Sales: ' + context.parsed.y;
+                    }
+                }
+            }
+        }
+    }
+});
+
+function changePeriod(days) {
+    const url = new URL(window.location);
+    url.searchParams.set('days', days);
+    window.location = url;
+}
+</script>
+{% endblock %}

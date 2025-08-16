@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Product Price Comparisons{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h2><i class="fas fa-list"></i> Product Price Comparisons</h2>
+            <p class="text-muted">Compare your product prices with competitors</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form method="get" class="form-inline">
+                <input type="text" name="search" class="form-control mr-2" placeholder="Search products..." value="{{ search_query }}">
+                <select name="category" class="form-control mr-2">
+                    <option value="">All Categories</option>
+                    {% for value, label in categories %}
+                        <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select name="status" class="form-control mr-2">
+                    <option value="">All Status</option>
+                    <option value="competitive" {% if competitive_status == 'competitive' %}selected{% endif %}>Competitive</option>
+                    <option value="overpriced" {% if competitive_status == 'overpriced' %}selected{% endif %}>Overpriced</option>
+                    <option value="underpriced" {% if competitive_status == 'underpriced' %}selected{% endif %}>Underpriced</option>
+                    <option value="no_match" {% if competitive_status == 'no_match' %}selected{% endif %}>No Match</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Comparisons Table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Your Price</th>
+                                    <th>Asif Price</th>
+                                    <th>PakLap Price</th>
+                                    <th>Status</th>
+                                    <th>Last Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comparison in page_obj %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ comparison.seller_product.name }}</strong>
+                                        <br><small class="text-muted">{{ comparison.seller_product.category }}</small>
+                                    </td>
+                                    <td>Rs. {{ comparison.seller_product.price|floatformat:0 }}</td>
+                                    <td>
+                                        {% if comparison.best_asif_match %}
+                                            Rs. {{ comparison.best_asif_match.price|floatformat:0 }}
+                                            <br>
+                                            <span class="{% if comparison.asif_price_difference > 0 %}text-danger{% else %}text-success{% endif %}">
+                                                {% if comparison.asif_price_difference > 0 %}+{% endif %}{{ comparison.asif_price_difference|floatformat:0 }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">No match</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if comparison.best_paklap_match %}
+                                            Rs. {{ comparison.best_paklap_match.price|floatformat:0 }}
+                                            <br>
+                                            <span class="{% if comparison.paklap_price_difference > 0 %}text-danger{% else %}text-success{% endif %}">
+                                                {% if comparison.paklap_price_difference > 0 %}+{% endif %}{{ comparison.paklap_price_difference|floatformat:0 }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">No match</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if comparison.best_asif_match or comparison.best_paklap_match %}
+                                            {% if comparison.asif_price_difference and comparison.asif_price_difference > 100 or comparison.paklap_price_difference and comparison.paklap_price_difference > 100 %}
+                                                <span class="badge badge-danger">Overpriced</span>
+                                            {% elif comparison.asif_price_difference and comparison.asif_price_difference < -100 or comparison.paklap_price_difference and comparison.paklap_price_difference < -100 %}
+                                                <span class="badge badge-warning">Underpriced</span>
+                                            {% else %}
+                                                <span class="badge badge-success">Competitive</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge badge-secondary">No Match</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ comparison.last_compared|timesince }} ago</td>
+                                    <td>
+                                        <a href="{% url 'price_comparison:product_detail' comparison.seller_product.id %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <p class="text-muted mb-0">No product comparisons found.</p>
+                                        <small>Add products to start price comparison.</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if competitive_status %}&status={{ competitive_status }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if competitive_status %}&status={{ competitive_status }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if competitive_status %}&status={{ competitive_status }}{% endif %}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

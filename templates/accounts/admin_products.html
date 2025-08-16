@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Admin - Product Management{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>📦 Product Management</h2>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">All Products ({{ products.count }} total)</h5>
+                        {% if products.count > 0 %}
+                            <button type="button" class="btn btn-danger btn-sm" 
+                                    title="Delete All Products" 
+                                    onclick="showDeleteAllModal()"
+                                    id="deleteAllBtn">
+                                <i class="fas fa-trash-alt"></i> Delete All Products
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Image</th>
+                                    <th>Product Name</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Category</th>
+                                    <th>Added Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                <tr>
+                                    <td>{{ product.id }}</td>
+                                    <td>
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                                                 style="width: 50px; height: 50px; object-fit: cover;" class="rounded">
+                                        {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ product.name|truncatechars:30 }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ product.description|truncatechars:50 }}</small>
+                                    </td>
+                                    <td>
+                                        <strong>PKR {{ product.price|floatformat:2|intcomma }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if product.stock == 0 %}
+                                            <span class="badge badge-danger">Out of Stock</span>
+                                        {% elif product.stock <= 5 %}
+                                            <span class="badge badge-warning">{{ product.stock }} - Low Stock</span>
+                                        {% else %}
+                                            <span class="badge badge-success">{{ product.stock }} in stock</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-info">{{ product.category|default:"Uncategorized" }}</span>
+                                    </td>
+                                    <td>
+                                        {% if product.created_at %}
+                                            {{ product.created_at|date:"M d, Y" }}
+                                        {% else %}
+                                            <span class="text-muted">Unknown</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <!-- View Product Details -->
+                                            <a href="{% url 'admin_product_detail' product.id %}" class="btn btn-sm btn-outline-primary" 
+                                               title="View Product Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <!-- Delete Product Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    title="Delete Product" 
+                                                    onclick="showDeleteModal('{{ product.id }}', '{{ product.name|escapejs }}')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No products found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete All Products Modal -->
+<div class="modal fade" id="deleteAllProductsModal" tabindex="-1" role="dialog" aria-labelledby="deleteAllProductsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteAllProductsModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Delete All Products
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="deleteAllProductsForm" method="POST" action="{% url 'admin_delete_all_products' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>CRITICAL WARNING:</strong> This action will permanently delete ALL products and cannot be undone!
+                    </div>
+                    
+                    <p><strong>You are about to delete {{ products.count }} product(s).</strong></p>
+                    
+                    <div class="alert alert-warning">
+                        <strong>This will:</strong>
+                        <ul class="mb-0">
+                            <li>Remove all product listings</li>
+                            <li>Delete all product images</li>
+                            <li>Clear all product reviews</li>
+                            <li>Remove products from all user wishlists</li>
+                            <li>Cancel any pending orders containing these products</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="delete_all_reason">Reason for Mass Deletion *</label>
+                        <select class="form-control" name="danger_reason" required>
+                            <option value="">Select a reason...</option>
+                            <option value="system_maintenance">System Maintenance</option>
+                            <option value="data_cleanup">Data Cleanup</option>
+                            <option value="policy_violation">Policy Violation</option>
+                            <option value="security_breach">Security Breach</option>
+                            <option value="database_reset">Database Reset</option>
+                            <option value="migration_issue">Migration Issue</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="delete_all_description">Description *</label>
+                        <textarea class="form-control" name="description" rows="3" 
+                                  placeholder="Provide a detailed description of why all products are being deleted..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmDeleteAll" required>
+                            <label class="form-check-label text-danger" for="confirmDeleteAll">
+                                <strong>I understand this action cannot be undone and will delete ALL products</strong>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteAllBtn">
+                        <i class="fas fa-trash-alt"></i> DELETE ALL PRODUCTS
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Product Modal -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" role="dialog" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteProductModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Delete Product
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="deleteProductForm" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Warning:</strong> This action cannot be undone!
+                    </div>
+                    
+                    <p>Are you sure you want to delete the product: <strong id="productName"></strong>?</p>
+                    
+                    <div class="form-group">
+                        <label for="danger_reason">Reason for Deletion *</label>
+                        <select class="form-control" name="danger_reason" required>
+                            <option value="">Select a reason...</option>
+                            <option value="fraud">Fraudulent Activity</option>
+                            <option value="spam">Spam/Inappropriate Content</option>
+                            <option value="fake_products">Fake/Counterfeit Products</option>
+                            <option value="scam">Scam Activities</option>
+                            <option value="violation">Terms of Service Violation</option>
+                            <option value="security_threat">Security Threat</option>
+                            <option value="harmful_content">Harmful Content</option>
+                            <option value="illegal_activity">Illegal Activity</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea class="form-control" name="description" rows="3" 
+                                  placeholder="Provide a detailed description of why this product is being deleted..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evidence">Evidence (Optional)</label>
+                        <textarea class="form-control" name="evidence" rows="2" 
+                                  placeholder="URLs, screenshots, or other evidence..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDeleteModal(productId, productName) {
+    // Set the product name in the modal
+    document.getElementById('productName').textContent = productName;
+    
+    // Set the form action URL
+    document.getElementById('deleteProductForm').action = '/accounts/admin/delete-product/' + productId + '/';
+    
+    // Show the modal using Bootstrap 5
+    var modal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
+    modal.show();
+}
+function showDeleteAllModal() {
+    // Show the modal using Bootstrap 5
+    var modal = new bootstrap.Modal(document.getElementById('deleteAllProductsModal'));
+    modal.show();
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,128 @@
+<!-- Debug JadeedBot Chatbox -->
+<div id="chatbot-container" class="chatbot-container">
+    <!-- Chat Toggle Button -->
+    <button id="chat-toggle" class="chat-toggle-btn" title="Chat with JadeedBot">
+        <i class="fas fa-comments"></i>
+    </button>
+
+    <!-- Chat Window -->
+    <div id="chat-window" class="chat-window" style="display: none;">
+        <div class="chat-header">
+            <h5>JadeedBot - Debug Mode</h5>
+            <button id="chat-close" class="chat-close-btn">×</button>
+        </div>
+        <div class="chat-messages">
+            <p>Debug: Chat is working! Click close to test.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    font-family: Arial, sans-serif;
+}
+
+.chat-toggle-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #007bff;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.chat-toggle-btn:hover {
+    background: #0056b3;
+}
+
+.chat-window {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 300px;
+    height: 400px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.chat-header {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.chat-messages {
+    padding: 15px;
+    height: 300px;
+    overflow-y: auto;
+}
+</style>
+
+<script>
+console.log('Debug: JadeedBot script loading...');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Debug: DOM loaded, initializing chatbot...');
+    
+    const chatToggle = document.getElementById('chat-toggle');
+    const chatWindow = document.getElementById('chat-window');
+    const chatClose = document.getElementById('chat-close');
+    
+    console.log('Debug: Elements found:', {
+        chatToggle: !!chatToggle,
+        chatWindow: !!chatWindow,
+        chatClose: !!chatClose
+    });
+    
+    if (!chatToggle || !chatWindow || !chatClose) {
+        console.error('Debug: Required elements not found!');
+        return;
+    }
+    
+    let isOpen = false;
+    
+    // Toggle chat window
+    chatToggle.addEventListener('click', function() {
+        console.log('Debug: Chat toggle clicked, isOpen:', isOpen);
+        if (isOpen) {
+            chatWindow.style.display = 'none';
+            isOpen = false;
+            console.log('Debug: Chat closed');
+        } else {
+            chatWindow.style.display = 'block';
+            isOpen = true;
+            console.log('Debug: Chat opened');
+        }
+    });
+    
+    // Close chat window
+    chatClose.addEventListener('click', function() {
+        console.log('Debug: Chat close button clicked');
+        chatWindow.style.display = 'none';
+        isOpen = false;
+    });
+    
+    console.log('Debug: JadeedBot initialized successfully');
+});
+</script>

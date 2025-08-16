@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recommended for You | Jadeed Gadgets{% endblock %}
+
+{% block extra_css %}
+<style>
+    .recommendation-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .recommendation-badge {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+    
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .product-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .product-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+    
+    .product-info {
+        padding: 1.5rem;
+    }
+    
+    .product-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+    
+    .product-brand {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .product-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    
+    .product-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .btn-view {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+        text-align: center;
+    }
+    
+    .btn-view:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    
+    .activity-summary {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+    }
+    
+    .activity-summary h6 {
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="recommendation-header">
+        <div class="recommendation-badge">
+            AI Recommendations
+        </div>
+        <h2 class="mb-3">Recommended Products for You</h2>
+        <p class="text-muted mb-0">Based on your browsing history and preferences</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Products Grid -->
+            {% if recommended_products %}
+                <div class="product-grid">
+                    {% for product in recommended_products %}
+                        <div class="product-card" data-product-id="{{ product.id }}">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                            <div class="product-info">
+                                <h5 class="product-title">{{ product.name }}</h5>
+                                <p class="product-brand">{{ product.brand }}</p>
+                                <div class="product-price">Rs. {{ product.price|floatformat:0 }}</div>
+                                
+                                <div class="product-actions">
+                                    <a href="{% url 'product_detail' product.id %}" class="btn-view">
+                                        <i class="fas fa-eye me-1"></i>View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-robot"></i>
+                    <h4>No Recommendations Yet</h4>
+                    <p class="text-muted">Start exploring products to get personalized recommendations!</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag me-2"></i>Browse Products
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Activity Summary -->
+            {% if has_interactions %}
+                <div class="activity-summary">
+                    <h6><i class="fas fa-history me-2"></i>Recent Activity</h6>
+                    {% for interaction in recent_interactions %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                {% if interaction.interaction_type == 'view' %}
+                                    <i class="fas fa-eye"></i>
+                                {% elif interaction.interaction_type == 'purchase' %}
+                                    <i class="fas fa-shopping-cart"></i>
+                                {% elif interaction.interaction_type == 'wishlist' %}
+                                    <i class="fas fa-heart"></i>
+                                {% else %}
+                                    <i class="fas fa-plus"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">{{ interaction.get_interaction_type_display }}</small>
+                                <div class="fw-medium">{{ interaction.product.name|truncatechars:30 }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'recommendations:interaction_history' %}" class="btn btn-outline-primary btn-sm">
+                            View All Activity
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Quick Actions -->
+            <div class="activity-summary">
+                <h6><i class="fas fa-compass me-2"></i>Explore More</h6>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'recommendations:popular_products' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-fire me-2"></i>Popular Products
+                    </a>
+                    <a href="{% url 'recommendations:category_recommendations' 'laptop' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-laptop me-2"></i>Laptop Recommendations
+                    </a>
+                    <a href="{% url 'recommendations:category_recommendations' 'mobile' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-mobile-alt me-2"></i>Mobile Recommendations
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set authentication status for interaction tracking
+    window.isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+</script>
+<script src="{% static 'js/recommendations.js' %}"></script>
+{% endblock %}

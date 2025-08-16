@@ -1,0 +1,708 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Admin Dashboard - Jadeed Gadgets{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-primary">🔑 Admin Dashboard</h1>
+                <span class="badge badge-success p-2">Logged in as: {{ user.username }}</span>
+            </div>
+            
+            <!-- Admin Alert -->
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>🚨 Admin Access:</strong> This dashboard is restricted to authorized admin user only.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>{{ total_users }}</h4>
+                    <p class="mb-0"><small>Total Users</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>{{ total_sellers }}</h4>
+                    <p class="mb-0"><small>Sellers</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>{{ total_buyers }}</h4>
+                    <p class="mb-0"><small>Buyers</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h4>{{ total_products }}</h4>
+                    <p class="mb-0"><small>Products</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4>{{ suspended_users_count }}</h4>
+                    <p class="mb-0"><small>Suspended</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h4>{{ pending_reports_count }}</h4>
+                    <p class="mb-0"><small>Reports</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🚀 Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 mb-2">
+                            <a href="{% url 'admin_users' %}" class="btn btn-outline-primary btn-block btn-sm">
+                                <i class="fas fa-users"></i> Users
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <a href="{% url 'admin_products' %}" class="btn btn-outline-success btn-block btn-sm">
+                                <i class="fas fa-box"></i> Products
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <a href="{% url 'admin_orders' %}" class="btn btn-outline-info btn-block btn-sm">
+                                <i class="fas fa-shopping-cart"></i> Orders
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <a href="/admin/" class="btn btn-outline-warning btn-block btn-sm">
+                                <i class="fas fa-cogs"></i> Django
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <button class="btn btn-danger btn-block btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                                <i class="fas fa-user-slash"></i> Delete User
+                            </button>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <button class="btn btn-warning btn-block btn-sm" data-bs-toggle="modal" data-bs-target="#suspendUserModal">
+                                <i class="fas fa-user-lock"></i> Suspend
+                            </button>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <button class="btn btn-success btn-block btn-sm" data-bs-toggle="modal" data-bs-target="#unsuspendUserModal">
+                                <i class="fas fa-user-check"></i> Unsuspend
+                            </button>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <button class="btn btn-info btn-block btn-sm" data-bs-toggle="modal" data-bs-target="#verifySellerModal">
+                                <i class="fas fa-store"></i> Verify Seller
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECURITY ALERTS -->
+    {% if suspended_users or recent_registered_users or duplicate_users or out_of_stock_products or unverified_sellers or new_sellers or large_orders %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Security Alerts</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- User Management Alerts -->
+                        {% if suspended_users %}
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-warning mb-2">
+                                <h6 class="alert-heading mb-2"><i class="fas fa-user-times"></i> Suspended Users ({{ suspended_users|length }})</h6>
+                                <ul class="list-unstyled mb-0">
+                                    {% for suspended_user in suspended_users %}
+                                    <li class="mb-1">
+                                        <strong>{{ suspended_user.user.username }}</strong> 
+                                        <span class="badge badge-secondary">{{ suspended_user.user.role|title }}</span>
+                                        <br><small class="text-muted">
+                                            Reason: {{ suspended_user.get_reason_display }}<br>
+                                            Suspended: {{ suspended_user.suspended_at|date:"M d, Y" }}
+                                            {% if suspended_user.suspension_end %}
+                                                | Until: {{ suspended_user.suspension_end|date:"M d, Y" }}
+                                            {% else %}
+                                                | Permanent
+                                            {% endif %}
+                                        </small>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if recent_registered_users %}
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-info mb-2">
+                                <h6 class="alert-heading mb-2"><i class="fas fa-user-plus"></i> Recent Registrations ({{ recent_registered_users|length }})</h6>
+                                <small class="text-muted d-block mb-2">Users registered in the last 24-48 hours</small>
+                                <ul class="list-unstyled mb-0">
+                                    {% for user in recent_registered_users %}
+                                    <li class="mb-1">
+                                        <strong>{{ user.username }}</strong> 
+                                        <span class="badge badge-primary">{{ user.role|title }}</span>
+                                        <br><small class="text-muted">Joined: {{ user.date_joined|date:"M d, Y H:i" }}</small>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if duplicate_users %}
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-warning mb-2">
+                                <h6 class="alert-heading mb-2"><i class="fas fa-exclamation-triangle"></i> Multiple Accounts ({{ duplicate_users|length }})</h6>
+                                <small class="text-muted d-block mb-2">Users with duplicate email addresses</small>
+                                <ul class="list-unstyled mb-0">
+                                    {% for user in duplicate_users %}
+                                    <li class="mb-1">
+                                        <strong>{{ user.username }}</strong> ({{ user.email }})
+                                        <span class="badge badge-secondary">{{ user.role|title }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Product Issues -->
+                        {% if out_of_stock_products %}
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-secondary mb-2">
+                                <h6 class="alert-heading mb-2"><i class="fas fa-box-open"></i> Out of Stock Products ({{ out_of_stock_products|length }})</h6>
+                                <small class="text-muted d-block mb-2">Active products with zero inventory</small>
+                                <ul class="list-unstyled mb-0">
+                                    {% for product in out_of_stock_products %}
+                                    <li class="mb-1">
+                                        <strong>{{ product.name|truncatechars:30 }}</strong>
+                                        <br><small class="text-muted">By: {{ product.seller.username }} | Price: PKR {{ product.price|floatformat:2|intcomma }}</small>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Seller Monitoring -->
+                        {% if unverified_sellers %}
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-warning mb-2">
+                                <h6 class="alert-heading mb-2"><i class="fas fa-user-check"></i> Unverified Sellers ({{ unverified_sellers|length }})</h6>
+                                <small class="text-muted d-block mb-2">Sellers with active products but unverified stores</small>
+                                <ul class="list-unstyled mb-0">
+                                    {% for seller in unverified_sellers %}
+                                    <li class="mb-1">
+                                        <strong>{{ seller.username }}</strong>
+                                        <br><small class="text-muted">Products: {{ seller.seller_products.count }} | Joined: {{ seller.date_joined|date:"M d, Y" }}</small>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if new_sellers %}
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-info mb-2">
+                                <h6 class="alert-heading mb-2"><i class="fas fa-store"></i> New Sellers ({{ new_sellers|length }})</h6>
+                                <small class="text-muted d-block mb-2">Sellers who joined recently</small>
+                                <ul class="list-unstyled mb-0">
+                                    {% for seller in new_sellers %}
+                                    <li class="mb-1">
+                                        <strong>{{ seller.username }}</strong>
+                                        <br><small class="text-muted">Joined: {{ seller.date_joined|date:"M d, Y" }} | Products: {{ seller.seller_products.count }}</small>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Order Patterns -->
+                        {% if large_orders %}
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-primary mb-2">
+                                <h6 class="alert-heading mb-2"><i class="fas fa-shopping-cart"></i> Large Orders ({{ large_orders|length }})</h6>
+                                <small class="text-muted d-block mb-2">Orders above normal threshold</small>
+                                <ul class="list-unstyled mb-0">
+                                    {% for order in large_orders %}
+                                    <li class="mb-1">
+                                        <strong>Order #{{ order.order_number }}</strong> - PKR {{ order.total_price|floatformat:2|intcomma }}
+                                        <br><small class="text-muted">By: {{ order.user.username }} | {{ order.created_at|date:"M d, Y" }}</small>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">👥 Recent Users</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_users %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Role</th>
+                                        <th>Joined</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in recent_users %}
+                                    <tr>
+                                        <td>{{ user.username }}</td>
+                                        <td>
+                                            <span class="badge badge-secondary">{{ user.role|default:"buyer" }}</span>
+                                        </td>
+                                        <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No users found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">📦 Recent Products</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_products %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in recent_products %}
+                                    <tr>
+                                        <td>{{ product.name|truncatechars:25 }}</td>
+                                        <td>PKR {{ product.price|floatformat:2|intcomma }}</td>
+                                        <td>
+                                            {% if product.stock_quantity == 0 %}
+                                                <span class="badge badge-danger">Out of Stock</span>
+                                            {% elif product.stock_quantity <= 5 %}
+                                                <span class="badge badge-warning">Low Stock ({{ product.stock_quantity }})</span>
+                                            {% else %}
+                                                <span class="badge badge-success">{{ product.stock_quantity }} in stock</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No products found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Security Information -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0">🔒 Security Information</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Admin User:</strong> {{ user.username }}</p>
+                    <p class="mb-1"><strong>Last Login:</strong> {{ user.last_login|date:"M d, Y H:i" }}</p>
+                    <p class="mb-0"><strong>Access Level:</strong> Full Admin Access</p>
+                    <small class="text-muted">This dashboard is restricted to the authorized admin user only.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Delete Dangerous User</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="deleteUserForm" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="deleteUserId">Select User to Delete:</label>
+                        <select class="form-control" id="deleteUserId" name="user_id" required>
+                            <option value="">Choose a user...</option>
+                            {% for user in recent_users %}
+                                {% if user.role != 'admin' %}
+                                <option value="{{ user.id }}">{{ user.username }} ({{ user.role|title }}) - ID: {{ user.id }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Only non-admin users can be deleted</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="deleteUserReason">Danger Reason:</label>
+                        <select class="form-control" id="deleteUserReason" name="danger_reason" required>
+                            <option value="">Select reason...</option>
+                            <option value="fraud">Fraudulent Activity</option>
+                            <option value="spam">Spam/Inappropriate Content</option>
+                            <option value="fake_products">Fake/Counterfeit Products</option>
+                            <option value="scam">Scam Activities</option>
+                            <option value="violation">Terms of Service Violation</option>
+                            <option value="security_threat">Security Threat</option>
+                            <option value="impersonation">Impersonation</option>
+                            <option value="harmful_content">Harmful Content</option>
+                            <option value="illegal_activity">Illegal Activity</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="deleteUserDescription">Description:</label>
+                        <textarea class="form-control" id="deleteUserDescription" name="description" rows="3" required 
+                                placeholder="Detailed description of the danger/issue..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="deleteUserEvidence">Evidence (optional):</label>
+                        <textarea class="form-control" id="deleteUserEvidence" name="evidence" rows="2" 
+                                placeholder="Links to evidence, screenshots, etc..."></textarea>
+                    </div>
+                    <div class="alert alert-danger">
+                        <strong>Warning:</strong> This action cannot be undone. All user data, products, and orders will be permanently deleted.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Suspend User Modal -->
+<div class="modal fade" id="suspendUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="fas fa-user-lock"></i> Suspend User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="suspendUserForm" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="suspendUserId">Select User to Suspend:</label>
+                        <select class="form-control" id="suspendUserId" name="user_id" required>
+                            <option value="">Choose a user...</option>
+                            {% for user in recent_users %}
+                                {% if user.role != 'admin' %}
+                                <option value="{{ user.id }}">{{ user.username }} ({{ user.role|title }}) - ID: {{ user.id }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Only non-admin users can be suspended</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="suspendUserReason">Danger Reason:</label>
+                        <select class="form-control" id="suspendUserReason" name="danger_reason" required>
+                            <option value="">Select reason...</option>
+                            <option value="fraud">Fraudulent Activity</option>
+                            <option value="spam">Spam/Inappropriate Content</option>
+                            <option value="fake_products">Fake/Counterfeit Products</option>
+                            <option value="scam">Scam Activities</option>
+                            <option value="violation">Terms of Service Violation</option>
+                            <option value="security_threat">Security Threat</option>
+                            <option value="impersonation">Impersonation</option>
+                            <option value="harmful_content">Harmful Content</option>
+                            <option value="illegal_activity">Illegal Activity</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="suspendUserDescription">Description:</label>
+                        <textarea class="form-control" id="suspendUserDescription" name="description" rows="3" required 
+                                placeholder="Detailed description of the issue..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="suspensionDays">Suspension Duration (days):</label>
+                        <input type="number" class="form-control" id="suspensionDays" name="suspension_days" 
+                               placeholder="Leave empty for permanent suspension">
+                        <small class="form-text text-muted">Leave empty for permanent suspension</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Suspend User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Unsuspend User Modal -->
+<div class="modal fade" id="unsuspendUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-user-check"></i> Unsuspend User</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="unsuspendUserForm" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="unsuspendUserId">Select User to Unsuspend:</label>
+                        <select class="form-control" id="unsuspendUserId" name="user_id" required>
+                            <option value="">Choose a suspended user...</option>
+                            {% for suspended_user in suspended_users %}
+                            <option value="{{ suspended_user.user.id }}">{{ suspended_user.user.username }} ({{ suspended_user.user.role|title }}) - ID: {{ suspended_user.user.id }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Only currently suspended users are shown</small>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> This will reactivate the user's account and products (if they are a seller).
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Unsuspend User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Verify Seller Modal -->
+<div class="modal fade" id="verifySellerModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-store"></i> Verify Seller</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="verifySellerForm" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="verifySellerUserId">Select Seller to Verify:</label>
+                        <select class="form-control" id="verifySellerUserId" name="user_id" required>
+                            <option value="">Choose an unverified seller...</option>
+                            {% for seller in unverified_sellers %}
+                            <option value="{{ seller.id }}">{{ seller.username }} - Products: {{ seller.seller_products.count }} - ID: {{ seller.id }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Only unverified sellers with products are shown</small>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> This will mark the seller's store as verified, giving them enhanced seller privileges.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">Verify Seller</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteUser(userId, username) {
+    document.getElementById('deleteUserId').value = userId;
+    document.getElementById('deleteUserForm').action = `/accounts/admin/delete-user/${userId}/`;
+    
+    // Use Bootstrap 5 modal API
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+    deleteModal.show();
+}
+
+function suspendUser(userId, username) {
+    document.getElementById('suspendUserId').value = userId;
+    document.getElementById('suspendUserForm').action = `/accounts/admin/suspend-user/${userId}/`;
+    
+    // Use Bootstrap 5 modal API
+    const suspendModal = new bootstrap.Modal(document.getElementById('suspendUserModal'));
+    suspendModal.show();
+}
+
+function deleteProduct(productId, productName) {
+    if (confirm(`Are you sure you want to delete product "${productName}"?`)) {
+        // Create a form and submit
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/accounts/admin/delete-product/${productId}/`;
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        // Add required fields with default values
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'danger_reason';
+        reasonInput.value = 'violation';
+        form.appendChild(reasonInput);
+        
+        const descInput = document.createElement('input');
+        descInput.type = 'hidden';
+        descInput.name = 'description';
+        descInput.value = 'Quick deletion from dashboard - reported as dangerous';
+        form.appendChild(descInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Handle form submission for delete user form when no user ID is preset
+document.getElementById('deleteUserForm').addEventListener('submit', function(e) {
+    const userIdInput = document.getElementById('deleteUserId');
+    const userId = userIdInput.value;
+    
+    if (!userId || userId === '') {
+        e.preventDefault();
+        alert('Please enter a valid User ID.');
+        return false;
+    }
+    
+    // Set the action URL dynamically if not already set
+    if (!this.action || this.action === window.location.href) {
+        this.action = `/accounts/admin/delete-user/${userId}/`;
+    }
+});
+
+// Handle form submission for suspend user form when no user ID is preset
+document.getElementById('suspendUserForm').addEventListener('submit', function(e) {
+    const userIdInput = document.getElementById('suspendUserId');
+    const userId = userIdInput.value;
+    
+    if (!userId || userId === '') {
+        e.preventDefault();
+        alert('Please enter a valid User ID.');
+        return false;
+    }
+    
+    // Set the action URL dynamically if not already set
+    if (!this.action || this.action === window.location.href) {
+        this.action = `/accounts/admin/suspend-user/${userId}/`;
+    }
+});
+
+function unsuspendUser(userId, username) {
+    document.getElementById('unsuspendUserId').value = userId;
+    document.getElementById('unsuspendUserForm').action = `/accounts/admin/unsuspend-user/${userId}/`;
+    
+    // Use Bootstrap 5 modal API
+    const unsuspendModal = new bootstrap.Modal(document.getElementById('unsuspendUserModal'));
+    unsuspendModal.show();
+}
+
+function verifySeller(userId, username) {
+    document.getElementById('verifySellerUserId').value = userId;
+    document.getElementById('verifySellerForm').action = `/accounts/admin/verify-seller/${userId}/`;
+    
+    // Use Bootstrap 5 modal API
+    const verifyModal = new bootstrap.Modal(document.getElementById('verifySellerModal'));
+    verifyModal.show();
+}
+
+// Handle form submission for unsuspend user form
+document.getElementById('unsuspendUserForm').addEventListener('submit', function(e) {
+    const userIdInput = document.getElementById('unsuspendUserId');
+    const userId = userIdInput.value;
+    
+    if (!userId || userId === '') {
+        e.preventDefault();
+        alert('Please select a user to unsuspend.');
+        return false;
+    }
+    
+    // Set the action URL dynamically if not already set
+    if (!this.action || this.action === window.location.href) {
+        this.action = `/accounts/admin/unsuspend-user/${userId}/`;
+    }
+});
+
+// Handle form submission for verify seller form
+document.getElementById('verifySellerForm').addEventListener('submit', function(e) {
+    const userIdInput = document.getElementById('verifySellerUserId');
+    const userId = userIdInput.value;
+    
+    if (!userId || userId === '') {
+        e.preventDefault();
+        alert('Please select a seller to verify.');
+        return false;
+    }
+    
+    // Set the action URL dynamically if not already set
+    if (!this.action || this.action === window.location.href) {
+        this.action = `/accounts/admin/verify-seller/${userId}/`;
+    }
+});
+
+// Messages are now handled by the global toast system in base.html
+</script>
+
+{% endblock %}

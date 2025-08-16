@@ -1,0 +1,1752 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Jadeed Gadgets | Premium Electronics Store{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        :root {
+            --primary-color: #FFD700;
+            --secondary-color: #FFA500;
+            --accent-color: #6B48FF;
+            --coral-color: #FF6F61;
+            --bright-pink: #FF4081;
+            --light-blue: #42A5F5;
+            --soft-pink: #F5E6E8;
+            --light-color: rgba(245, 230, 232, 0.95);
+            --dark-color: #1a1a1a;
+            --text-highlight: #2c2c2c;
+            --panel-bg: rgba(255, 255, 255, 1.0);
+            --panel-border: rgba(107, 72, 255, 0.3);
+            --text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            --golden-yellow: #FFD700;
+            --blue-accent: #42A5F5;
+            --blue-light: rgba(66, 165, 245, 0.1);
+            --blue-medium: rgba(66, 165, 245, 0.2);
+            --gradient-primary: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            --gradient-secondary: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+            --gradient-banner: linear-gradient(135deg, #FF6F61 0%, #6B48FF 100%);
+            --gradient-shop: linear-gradient(135deg, #FF4081 0%, #E91E63 100%);
+            --gradient-browse: linear-gradient(135deg, #42A5F5 0%, #2196F3 100%);
+            --shadow-primary: 0 8px 25px rgba(255, 215, 0, 0.3);
+            --shadow-secondary: 0 4px 15px rgba(107, 72, 255, 0.2);
+            --shadow-coral: 0 8px 25px rgba(255, 111, 97, 0.4);
+            --shadow-pink: 0 8px 25px rgba(255, 64, 129, 0.4);
+            --shadow-blue: 0 8px 25px rgba(66, 165, 245, 0.4);
+        }
+        
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            line-height: 1.7;
+            background: #D5C4C5 !important;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+        
+        /* Add subtle texture pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.15) 1px, transparent 0);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Enhanced Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', 'Inter', sans-serif !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.025em !important;
+            text-rendering: optimizeLegibility;
+        }
+        
+        h1 { font-size: 3rem !important; }
+        h2 { font-size: 2.5rem !important; }
+        h3 { font-size: 2rem !important; }
+        h4 { font-size: 1.75rem !important; }
+        h5 { font-size: 1.5rem !important; }
+        h6 { font-size: 1.25rem !important; }
+        
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(248, 245, 242, 0.10)) !important;
+            {% comment %} backdrop-filter: blur(5px) saturate(180%); {% endcomment %}
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(255, 215, 0, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            {% comment %} background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); {% endcomment %}
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+        }
+        
+        .btn-outline-primary {
+            {% comment %} border: 2px solid var(--primary-color); {% endcomment %}
+            color: var(--primary-color);
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .badge {
+            border-radius: 50px;
+            padding: 0.5em 1em;
+            font-weight: 600;
+        }
+        
+        .footer {
+            background: rgba(164, 128, 130, 1);
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 4rem;
+            border-top: 3px solid var(--accent-color);
+        }
+        
+        .search-form {
+            position: relative;
+            max-width: 400px;
+        }
+        
+        .search-input {
+            border-radius: 25px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 3rem 0.75rem 1.5rem;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(125, 121, 102, 0.25);
+        }
+        
+        .search-input::placeholder {
+            color: white;
+            opacity: 1;
+        }
+        
+        .search-input::-webkit-input-placeholder {
+            color: white;
+        }
+        
+        .search-input::-moz-placeholder {
+            color: white;
+        }
+        
+        .search-input:-ms-input-placeholder {
+            color: white;
+        }
+        
+        .search-input::-ms-input-placeholder {
+            color: white;
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: #a48082;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            {% comment %} background: linear-gradient(135deg, var(--accent-color), var(--secondary-color)); {% endcomment %}
+            color: var(--primary-color);
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(125, 121, 102, 0.3);
+        }
+        
+        .nav-link-custom {
+            position: relative;
+            color: white !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link-custom:hover {
+            background: rgba(125, 121, 102, 0.1);
+            color: var(--primary-color) !important;
+        }
+        
+        .main-content {
+            min-height: 70vh;
+            padding: 2rem 0;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, rgba(125, 121, 102, 0.15), rgba(160, 144, 106, 0.15));
+            border-radius: 25px;
+            padding: 4rem 2rem;
+            margin: 2rem 0;
+            text-align: center;
+            border: 1px solid rgba(125, 121, 102, 0.2);
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .product-card img {
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* Reduce font size on product cards */
+        .product-card .card-title {
+            font-size: 0.9rem !important;
+        }
+        
+        .product-card .card-text {
+            font-size: 0.8rem !important;
+        }
+        
+        .card-title {
+            font-size: 0.9rem !important;
+        }
+        
+        .card-text {
+            font-size: 0.8rem !important;
+        }
+        
+        /* Toast Notifications with green theme */
+        .toast-notification {
+            background: var(--green-light) !important;
+            border: 2px solid var(--green-accent) !important;
+            backdrop-filter: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(25, 118, 210, 0.25);
+            min-width: 350px;
+            max-width: 400px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transform: translateX(100%);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+        
+        .toast-notification.hide {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        
+        .toast-notification::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            border-radius: 20px 0 0 20px;
+        }
+        
+        .toast-notification.success::before {
+            background: linear-gradient(135deg, #06d6a0, #118d57);
+        }
+        
+        .toast-notification.error::before {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+        
+        .toast-notification.warning::before {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+        }
+        
+        .toast-notification.info::before {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .toast-header {
+            background: transparent;
+            border: none;
+            padding: 15px 20px 10px;
+            font-weight: 600;
+        }
+        
+        .toast-body {
+            padding: 0 20px 15px;
+            color: #2c3e50;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .toast-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #6c757d;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .toast-close:hover {
+            color: #2c3e50;
+        }
+        
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+        
+        .toast-notification.success .toast-icon {
+            background: rgba(6, 214, 160, 0.1);
+            color: #06d6a0;
+        }
+        
+        .toast-notification.error .toast-icon {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+        }
+        
+        .toast-notification.warning .toast-icon {
+            background: rgba(254, 202, 87, 0.1);
+            color: #feca57;
+        }
+        
+        .toast-notification.info .toast-icon {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 20px 20px;
+            overflow: hidden;
+        }
+        
+        .toast-progress-bar {
+            height: 100%;
+            width: 100%;
+            transform: translateX(-100%);
+            transition: transform linear;
+        }
+        
+        .toast-notification.success .toast-progress-bar {
+            background: linear-gradient(135deg, #06d6a0, #118d57);
+        }
+        
+        .toast-notification.error .toast-progress-bar {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+        
+        .toast-notification.warning .toast-progress-bar {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+        }
+        
+        .toast-notification.info .toast-progress-bar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .form-control {
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(125, 121, 102, 0.25);
+        }
+        
+        /* Enhanced Panel Styling for Mauve Background with Green Accents */
+        .card, .product-card, .auth-container, .panel {
+            background: var(--green-light) !important;
+            border: 2px solid var(--green-accent) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(25, 118, 210, 0.25) !important;
+        }
+        
+        .card:hover, .product-card:hover {
+            background: var(--green-medium) !important;
+            border-color: var(--green-accent) !important;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(25, 118, 210, 0.35) !important;
+        }
+        
+        /* Navigation styling with green accents */
+        .navbar {
+            background: var(--green-light) !important;
+            {% comment %} backdrop-filter: blur(20px); {% endcomment %}
+            border-bottom: 2px solid var(--green-accent);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Dropdown menus with green accents */
+        .dropdown-menu {
+            background: var(--green-light) !important;
+            border: 2px solid var(--green-accent) !important;
+            backdrop-filter: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        /* Form controls with green accents */
+        .form-control, .search-input {
+            background: var(--green-light) !important;
+            border: 2px solid var(--green-accent) !important;
+                backdrop-filter: none;
+        }
+        
+        .form-control:focus, .search-input:focus {
+            background: var(--green-medium) !important;
+            border-color: var(--green-accent) !important;
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25) !important;
+        }
+        
+        /* Hero section enhancement */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(230, 208, 184, 0.3), rgba(212, 167, 171, 0.3)) !important;
+            border: 2px solid var(--panel-border) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Enhanced Text Highlighting */
+        .card-title, .product-info h3, h1, h2, h3, h4, h5, h6 {
+            color: var(--text-highlight) !important;
+            font-weight: 700 !important;
+            text-shadow: var(--text-shadow);
+            letter-spacing: -0.02em;
+        }
+        
+        /* Card and Panel Text */
+        .card-body, .product-info, .auth-container {
+            color: var(--dark-color) !important;
+        }
+        
+        .card-body p, .product-info p, .card-text {
+            color: var(--text-highlight) !important;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+        
+        /* Product titles and descriptions */
+        .product-card .card-title {
+            color: var(--text-highlight) !important;
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+            text-shadow: var(--text-shadow);
+        }
+        
+        /* Brand and meta text */
+        .text-muted, .brand, .review-count {
+            color: rgba(26, 26, 26, 0.7) !important;
+            font-weight: 500 !important;
+        }
+        
+        /* Price highlighting */
+        .price {
+            color: var(--primary-color) !important;
+            font-weight: 800 !important;
+            font-size: 1.25rem !important;
+            text-shadow: var(--text-shadow);
+        }
+        
+        /* Button text */
+        .btn {
+            font-weight: 600 !important;
+            text-shadow: none;
+        }
+        
+        /* Form labels and inputs */
+        .form-group label, .form-label {
+            color: var(--text-highlight) !important;
+            font-weight: 600 !important;
+        }
+        
+        .form-control, .form-control:focus {
+            color: var(--text-highlight) !important;
+            font-weight: 500;
+        }
+        
+        /* Navigation text */
+        .nav-link-custom {
+            color: var(--text-highlight) !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Dropdown text */
+        .dropdown-item {
+            color: var(--text-highlight) !important;
+            font-weight: 500;
+        }
+        
+        /* Toast text */
+        .toast-header strong {
+            color: var(--text-highlight) !important;
+            font-weight: 700 !important;
+        }
+        
+        .toast-body {
+            color: var(--text-highlight) !important;
+            font-weight: 500;
+        }
+        
+        /* Modern Button Enhancements */
+        .btn {
+            {% comment %} backdrop-filter: blur(5px); {% endcomment %}
+            {% comment %} box-shadow: var(--shadow-secondary); {% endcomment %}
+            border-radius: 50px !important;
+            padding: 0.875rem 2.5rem !important;
+            font-family: 'Poppins', 'Inter', sans-serif !important;
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            {% comment %} box-shadow: var(--shadow-primary), 0 15px 35px rgba(0, 0, 0, 0.2); {% endcomment %}
+        }
+        
+        .btn:active {
+            transform: translateY(-2px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+        
+        /* Primary Button with Enhanced Yellow Gradient */
+        .btn-primary {
+            {% comment %} background: white !important; {% endcomment %}
+            border: 3px solid transparent !important;
+            color: #1a1a1a !important;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        .btn-primary:hover {
+            background: #a48082 !important;
+            border-color: var(--accent-color) !important;
+            color: white !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Secondary Button with Blue Accent */
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--accent-color), #1565C0) !important;
+            border: 3px solid transparent !important;
+            color: white !important;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #1565C0, #0D47A1) !important;
+            border-color: var(--primary-color) !important;
+        }
+        
+        /* Outline Button Enhanced */
+        .btn-outline-primary {
+            background: transparent !important;
+            border: 3px solid var(--primary-color) !important;
+            color: var(--primary-color) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-outline-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: width 0.4s ease;
+            z-index: -1;
+        }
+        
+        .btn-outline-primary:hover::after {
+            width: 100%;
+        }
+        
+        .btn-outline-primary:hover {
+            color: #1a1a1a !important;
+            border-color: var(--accent-color) !important;
+        }
+        
+        /* Shop Now Button Special Styling */
+        .btn-shop-now {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, #FF8F00 100%) !important;
+            border: 3px solid var(--accent-color) !important;
+            color: #1a1a1a !important;
+            font-size: 1.25rem !important;
+            padding: 1rem 3rem !important;
+            box-shadow: 0 8px 32px rgba(255, 193, 7, 0.4), 0 4px 16px rgba(25, 118, 210, 0.3);
+        }
+        
+        .btn-shop-now:hover {
+            transform: translateY(-6px) scale(1.08);
+            box-shadow: 0 12px 48px rgba(255, 193, 7, 0.6), 0 8px 24px rgba(25, 118, 210, 0.4);
+            border-color: var(--primary-color) !important;
+        }
+        
+        /* Add to Cart Button */
+        .btn-add-cart {
+            background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+            border: 3px solid transparent !important;
+            color: white !important;
+        }
+        
+        .btn-add-cart:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40) !important;
+            border-color: var(--primary-color) !important;
+        }
+        
+        /* New Bright Pink Button with Glossy Effect */
+        .btn-bright-pink, .btn-pink {
+            background: var(--gradient-shop) !important;
+            border: 3px solid transparent !important;
+            color: white !important;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-pink), 0 8px 32px rgba(255, 64, 129, 0.3) !important;
+        }
+        
+        .btn-bright-pink::after, .btn-pink::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+        
+        .btn-bright-pink:hover::after, .btn-pink:hover::after {
+            animation: glossyShine 0.8s ease-out;
+        }
+        
+        .btn-bright-pink:hover, .btn-pink:hover {
+            background: linear-gradient(135deg, #E91E63, #C2185B) !important;
+            border-color: var(--light-blue) !important;
+            box-shadow: var(--shadow-pink), 0 12px 48px rgba(255, 64, 129, 0.5) !important;
+            transform: translateY(-6px) scale(1.08);
+        }
+        
+        /* New Light Blue Button with Glossy Effect */
+        .btn-light-blue, .btn-blue {
+            background: var(--gradient-browse) !important;
+            border: 3px solid transparent !important;
+            color: white !important;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-blue), 0 8px 32px rgba(66, 165, 245, 0.3) !important;
+        }
+        
+        .btn-light-blue::after, .btn-blue::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+        
+        .btn-light-blue:hover::after, .btn-blue:hover::after {
+            animation: glossyShine 0.8s ease-out;
+        }
+        
+        .btn-light-blue:hover, .btn-blue:hover {
+            background: linear-gradient(135deg, #2196F3, #1976D2) !important;
+            border-color: var(--bright-pink) !important;
+            box-shadow: var(--shadow-blue), 0 12px 48px rgba(66, 165, 245, 0.5) !important;
+            transform: translateY(-6px) scale(1.08);
+        }
+        
+        /* Coral Action Button */
+        .btn-coral, .btn-action {
+            background: linear-gradient(135deg, var(--coral-color), #FF5722) !important;
+            border: 3px solid transparent !important;
+            color: white !important;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-coral), 0 8px 32px rgba(255, 111, 97, 0.3) !important;
+        }
+        
+        .btn-coral::after, .btn-action::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+        
+        .btn-coral:hover::after, .btn-action:hover::after {
+            animation: glossyShine 0.8s ease-out;
+        }
+        
+        .btn-coral:hover, .btn-action:hover {
+            background: linear-gradient(135deg, #FF5722, #E64A19) !important;
+            border-color: var(--primary-color) !important;
+            box-shadow: var(--shadow-coral), 0 12px 48px rgba(255, 111, 97, 0.5) !important;
+            transform: translateY(-6px) scale(1.08);
+        }
+        
+        /* Glossy Shine Animation */
+        @keyframes glossyShine {
+            0% {
+                opacity: 0;
+                transform: translateX(-100%) rotate(45deg);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+        
+        /* Enhanced Gradient Button Group */
+        .btn-group-modern {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        
+        .btn-group-modern .btn {
+            min-width: 200px;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+        }
+        
+        /* Button Animations */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes buttonPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 193, 7, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+        }
+        
+        .btn-pulse {
+            animation: buttonPulse 2s infinite;
+        }
+        
+        /* Category Cards Enhancement */
+        .category-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 245, 242, 0.9)) !important;
+            border: 2px solid transparent !important;
+            border-radius: 25px !important;
+            padding: 2rem 1.5rem !important;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(200, 150, 154, 0.15) !important;
+        }
+        
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+        
+        .category-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .category-card:hover {
+            transform: translateY(-12px) scale(1.02) !important;
+            /* background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(252, 248, 245, 0.95)) !important; */
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(200, 150, 154, 0.25) !important;
+        }
+        
+        /* Category icons */
+        .category-card i {
+            font-size: 3rem !important;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .category-card:hover i {
+            transform: scale(1.1);
+            filter: drop-shadow(0 4px 8px rgba(200, 150, 154, 0.3));
+        }
+        
+        /* Category text styling */
+        .category-card h3, .category-card .category-title {
+            color: #1a1a1a !important;
+            font-weight: 800 !important;
+            font-size: 1.4rem !important;
+            margin-bottom: 0.5rem !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            letter-spacing: -0.02em;
+        }
+        
+        .category-card p, .category-card .category-description {
+            color: #2c2c2c !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+            margin-bottom: 0 !important;
+            opacity: 0.8;
+        }
+        
+        .category-card:hover .category-title {
+            color: var(--primary-color) !important;
+            transform: translateY(-2px);
+        }
+        
+        .category-card:hover .category-description {
+            opacity: 1;
+            color: #1a1a1a !important;
+        }
+        
+        /* Special color variations for different categories */
+        .category-card:nth-child(1) {
+            background: linear-gradient(135deg, rgba(230, 245, 255, 0.9), rgba(240, 248, 255, 0.95)) !important;
+        }
+        
+        .category-card:nth-child(1):hover {
+            background: linear-gradient(135deg, rgba(230, 245, 255, 1), rgba(240, 248, 255, 1)) !important;
+        }
+        
+        .category-card:nth-child(2) {
+            background: linear-gradient(135deg, rgba(255, 245, 230, 0.9), rgba(255, 248, 240, 0.95)) !important;
+        }
+        
+        .category-card:nth-child(2):hover {
+            background: linear-gradient(135deg, rgba(255, 245, 230, 1), rgba(255, 248, 240, 1)) !important;
+        }
+        
+        .category-card:nth-child(3) {
+            background: linear-gradient(135deg, rgba(245, 255, 230, 0.9), rgba(248, 255, 240, 0.95)) !important;
+        }
+        
+        .category-card:nth-child(3):hover {
+            background: linear-gradient(135deg, rgba(245, 255, 230, 1), rgba(248, 255, 240, 1)) !important;
+        }
+        
+        .category-card:nth-child(4) {
+            background: linear-gradient(135deg, rgba(255, 230, 245, 0.9), rgba(255, 240, 248, 0.95)) !important;
+        }
+        
+        .category-card:nth-child(4):hover {
+            background: linear-gradient(135deg, rgba(255, 230, 245, 1), rgba(255, 240, 248, 1)) !important;
+        }
+        
+        /* Shop by Category Section Heading */
+        .section-header, .category-section-title {
+            text-align: center;
+            margin: 3rem 0 2rem 0;
+            position: relative;
+        }
+        
+        .section-header h2, .category-section-title h2, 
+        .section-header h3, .category-section-title h3 {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+            font-size: 2.5rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem !important;
+            position: relative;
+            display: inline-block;
+        }
+        
+        /* Add decorative elements */
+        .section-header h2::before, .category-section-title h2::before,
+        .section-header h3::before, .category-section-title h3::before {
+            content: '🛍️';
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+        
+        .section-header h2::after, .category-section-title h2::after,
+        .section-header h3::after, .category-section-title h3::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(200, 150, 154, 0.3);
+        }
+        
+        /* Alternative styling for category headings */
+        .categories-heading {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 245, 242, 0.9)) !important;
+            border: 2px solid transparent !important;
+            border-radius: 20px !important;
+            padding: 1.5rem 2rem !important;
+            margin: 2rem auto !important;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(200, 150, 154, 0.15) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .categories-heading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+        }
+        
+        .categories-heading h2, .categories-heading h3 {
+            color: #1a1a1a !important;
+            font-weight: 800 !important;
+            font-size: 1.8rem !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            margin: 0 !important;
+            text-align: center;
+        }
+        
+        .categories-heading i {
+            font-size: 1.2rem !important;
+            margin-right: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Hero Section Text Styling */
+        .hero-section h1, .hero h1, .hero-content h1,
+        .jumbotron h1, .welcome-title,
+        .hero-section .display-4, .hero-section .fw-bold {
+            color: #000000 !important;
+            font-weight: 800 !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .hero-section p, .hero p, .hero-content p,
+        .jumbotron p, .welcome-description,
+        .hero-section .lead {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            font-size: 1.2rem !important;
+            line-height: 1.6;
+        }
+        
+        .hero-section .lead, .hero .lead, .hero-content .lead,
+        .jumbotron .lead {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Dynamic Coral-Purple Banner/Hero Section */
+        .hero-section, .hero, .jumbotron, .banner-section {
+            background: var(--gradient-banner) !important;
+            border: 3px solid var(--coral-color) !important;
+            border-radius: 30px !important;
+            padding: 4rem 2rem !important;
+            margin: 2rem 0 !important;
+            text-align: center;
+            box-shadow: var(--shadow-coral), 0 4px 20px rgba(107, 72, 255, 0.3) !important;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .hero-section::before, .hero::before, .jumbotron::before, .banner-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-color), var(--coral-color), var(--accent-color));
+            border-radius: 30px 30px 0 0;
+        }
+        
+        /* Hero Section Background Pattern */
+        .hero-section::after, .hero::after, .jumbotron::after, .banner-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Enhanced Welcome Text Styling */
+        .hero-section h1, .hero h1, .hero-content h1,
+        .jumbotron h1, .welcome-title, .banner-title,
+        .hero-section .display-4, .hero-section .fw-bold {
+            color: var(--primary-color) !important;
+            font-weight: 900 !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+            font-size: 3.5rem !important;
+            margin-bottom: 1.5rem !important;
+            position: relative;
+            z-index: 2;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+        
+        .hero-section p, .hero p, .hero-content p,
+        .jumbotron p, .welcome-description, .banner-description,
+        .hero-section .lead {
+            color: white !important;
+            font-weight: 600 !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+            font-size: 1.3rem !important;
+            line-height: 1.7;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Footer enhancement */
+        .footer {
+            background: rgba(164, 128, 130, 1) !important;
+            backdrop-filter: blur(10px);
+            border-top: 3px solid var(--accent-color) !important;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Product Detail Page Text Styling */
+        .product-detail h1, .product-detail h2, .product-detail h3, 
+        .product-detail h4, .product-detail h5, .product-detail h6,
+        .product-info h1, .product-info h2, .product-info h3,
+        .product-info h4, .product-info h5, .product-info h6 {
+            color: #000000 !important;
+            font-weight: 800 !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .product-detail p, .product-info p, .product-description,
+        .product-specifications p, .specifications p {
+            color: #000000 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            line-height: 1.6;
+        }
+        
+        /* Product title and brand */
+        .product-title, .product-name {
+            color: #000000 !important;
+            font-weight: 800 !important;
+            font-size: 2rem !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .product-brand, .brand-name {
+            color: #333333 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Product price */
+        .product-price, .price-display {
+            color: #d32f2f !important;
+            font-weight: 800 !important;
+            font-size: 1.5rem !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        /* Stock status */
+        .stock-status, .availability {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Specifications section */
+        .specifications h3, .specifications h4,
+        .product-specifications h3, .product-specifications h4 {
+            color: #000000 !important;
+            font-weight: 800 !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .specifications dt, .specifications dd,
+        .product-specifications dt, .product-specifications dd {
+            color: #000000 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Category and metadata */
+        .category-info, .product-category {
+            color: #000000 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Breadcrumb styling */
+        .breadcrumb-item, .breadcrumb-item a {
+            color: #000000 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .breadcrumb-item.active {
+            color: #333333 !important;
+        }
+        
+        /* General text elements on product pages */
+        .container h1, .container h2, .container h3, 
+        .container h4, .container h5, .container h6 {
+            color: #000000 !important;
+            font-weight: 800 !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .container p, .container span, .container div {
+            color: white !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Badge and label styling */
+        .badge {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            text-shadow: none !important;
+        }
+        
+        /* Universal Black Text Override - Most Important */
+        *, *::before, *::after {
+            color: black !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Headings with extra emphasis */
+        h1, h2, h3, h4, h5, h6 {
+            color: #000000 !important;
+            font-weight: 800 !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        /* Paragraphs and text elements */
+        p, span, div, li, td, th, label, a {
+            color: #000000 !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Product specific elements */
+        .product-title, .product-name, .card-title {
+            color: #000000 !important;
+            font-weight: 900 !important;
+            font-size: 1.5rem !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Brand and category text */
+        .brand-name, .category-name, .text-muted {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        /* Breadcrumb items */
+        .breadcrumb, .breadcrumb-item, .breadcrumb a {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Override for specific elements that should keep their colors */
+        .btn, .btn * {
+            {% comment %} color: white !important; {% endcomment %}
+            text-shadow: none !important;
+        }
+        
+        .navbar-brand, .navbar-brand * {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+        }
+        
+        .footer, .footer *, .footer a {
+            color: white !important;
+            text-shadow: none !important;
+        }
+        
+        /* Navigation links */
+        .nav-link, .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Navbar icons - ensure they are white */
+        .navbar .nav-link i, .navbar-nav .nav-link i, .nav-link-custom i {
+            color: white !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Dropdown items */
+        .dropdown-item {
+            color: white !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <!-- Brand -->
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static 'images/logo2.png' %}" alt="Logo" class="me-2" style="height: 100px; width: auto">
+            </a>
+            
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Search Form -->
+            <div class="d-none d-lg-block mx-4 flex-grow-1">
+                <form method="get" action="{% url 'home' %}" class="search-form">
+                    <input type="text" name="q" value="{{ request.GET.q }}" 
+                           placeholder="Search laptops, accessories..." class="search-input form-control" autocomplete="off">
+                    {% if request.GET.category %}
+                        <input type="hidden" name="category" value="{{ request.GET.category }}">
+                    {% endif %}
+                    <button type="submit" class="search-btn" title="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Navigation Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <!-- Categories Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle nav-link-custom" href="#" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            Categories
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'home' %}">All Categories</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for category_code, category_name in categories %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'category_products' category_code %}">
+                                        <i class="fas fa-{% if category_code == 'laptop' %}laptop{% else %}plug{% endif %} me-2"></i>{{ category_name }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    
+                    <!-- Camera Icon - Temporarily disabled -->
+                      <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="{% url 'visual_search' %}" title="Visual Search">
+                            <i class="fas fa-camera me-1"></i>
+                        </a>
+                    </li>
+                    
+                    {% if user.is_authenticated and user.role == 'buyer' %}
+
+                        <!-- Wishlist -->
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-custom" href="{% url 'wishlist' %}">
+                                <i class="fas fa-heart me-1"></i>Wishlist
+                            </a>
+                        </li>
+                        
+                        <!-- Cart -->
+                        <li class="nav-item position-relative">
+                            <a class="nav-link nav-link-custom" href="{% url 'cart' %}">
+                                <i class="fas fa-shopping-cart me-1"></i>Cart
+                                {% if cart_items_count > 0 %}
+                                    <span class="cart-badge">{{ cart_items_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        
+                        <!-- Orders -->
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-custom" href="{% url 'orders' %}">
+                                <i class="fas fa-clipboard-list me-1"></i>Orders
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated %}
+                        <!-- User Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle nav-link-custom" href="#" role="button" 
+                               data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>{{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'settings' %}">
+                                    <i class="fas fa-cog me-2"></i>Settings
+                                </a></li>
+                                {% if user.role == 'admin' and user.username == 'Hasnain Hassan' %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                                    </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-custom" href="{% url 'login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{% url 'register' %}">
+                                <i class="fas fa-user-plus me-1"></i>Sign Up
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="position-fixed" style="top: 20px; right: 20px; z-index: 9999;"></div>
+    
+    <!-- Hidden messages for JavaScript processing -->
+    {% if messages %}
+        <div id="django-messages" style="display: none;">
+            {% for message in messages %}
+                <div data-message="{{ message|escapejs }}" data-type="{{ message.tags }}"></div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div style="margin-top: 100px;"> <!-- Account for fixed navbar -->
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3">
+                        <img src="{% static 'images/logo2.png' %}" alt="Logo" class="me-2" style="height: 90px; width: auto;">
+                    </h5>
+                    <p class="text-light">Your premier destination for the latest electronics, gadgets, and tech accessories at unbeatable prices.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-light"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6 class="mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'home' %}" class="text-light text-decoration-none">Home</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Products</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Categories</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="mb-3">Customer Service</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">Contact Us</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">FAQs</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Shipping Info</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Returns</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="mb-3">Contact Info</h6>
+                    <p class="text-light mb-2">
+                        <i class="fas fa-envelope me-2"></i>support@jadeedgadgets.pk
+                    </p>
+                    <p class="text-light mb-2">
+                        <i class="fas fa-phone me-2"></i>+92 123 4567890
+                    </p>
+                    <p class="text-light mb-0">
+                        <i class="fas fa-map-marker-alt me-2"></i>Lahore, Pakistan
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4 text-light">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-light mb-0">&copy; 2025 Jadeed Gadgets. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-light mb-0">Made with <i class="fas fa-heart text-danger"></i> in Pakistan</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JadeedBot Chatbox -->
+    {% include 'chatbot/chatbox_fixed.html' %}
+    
+    <!-- jQuery (for legacy compatibility) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-K+ctZQ+YdBV3r3ZbU8xNQf0D8zUuwFfBzzCbtfYy4Xk=" crossorigin="anonymous"></script>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+    
+    <!-- Custom Scripts -->
+    {% block scripts %}
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Initialize toast notifications for Django messages
+        document.addEventListener('DOMContentLoaded', function() {
+            const messagesContainer = document.getElementById('django-messages');
+            if (messagesContainer) {
+                const messages = messagesContainer.querySelectorAll('[data-message]');
+                messages.forEach(function(messageEl, index) {
+                    setTimeout(function() {
+                        showToast(messageEl.dataset.message, messageEl.dataset.type);
+                    }, index * 200); // Stagger the appearance
+                });
+            }
+        });
+        
+        // AJAX Add to Cart function
+        function addToCartAjax(productId) {
+            fetch(`/accounts/cart/add/${productId}/`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update cart count in navigation
+                    updateCartCount(data.cart_items_count);
+                    
+                    // Show success message
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred while adding to cart', 'error');
+            });
+        }
+        
+        // Update cart count in navigation
+        function updateCartCount(count) {
+            const cartBadge = document.querySelector('.cart-badge');
+            if (cartBadge) {
+                if (count > 0) {
+                    cartBadge.textContent = count;
+                    cartBadge.style.display = 'flex';
+                } else {
+                    cartBadge.style.display = 'none';
+                }
+            }
+        }
+        
+        // Show beautiful toast notification
+        function showToast(message, type = 'info', duration = 5000) {
+            const toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) return;
+            
+            // Map message types
+            const typeMap = {
+                'success': { icon: 'fa-check-circle', title: 'Success!' },
+                'error': { icon: 'fa-exclamation-circle', title: 'Error!' },
+                'warning': { icon: 'fa-exclamation-triangle', title: 'Warning!' },
+                'info': { icon: 'fa-info-circle', title: 'Info' },
+                'danger': { icon: 'fa-exclamation-circle', title: 'Error!' } // Map danger to error
+            };
+            
+            const toastType = typeMap[type] || typeMap['info'];
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type === 'danger' ? 'error' : type}`;
+            
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <div class="toast-icon">
+                        <i class="fas ${toastType.icon}"></i>
+                    </div>
+                    <strong>${toastType.title}</strong>
+                    <button type="button" class="toast-close" onclick="closeToast(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <div class="toast-progress">
+                    <div class="toast-progress-bar" style="transition-duration: ${duration}ms;"></div>
+                </div>
+            `;
+            
+            // Add to container
+            toastContainer.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.add('show');
+                const progressBar = toast.querySelector('.toast-progress-bar');
+                if (progressBar) {
+                    progressBar.style.transform = 'translateX(0)';
+                }
+            }, 100);
+            
+            // Auto-remove after duration
+            setTimeout(() => {
+                removeToast(toast);
+            }, duration);
+            
+            // Add click to dismiss
+            toast.addEventListener('click', function(e) {
+                if (!e.target.closest('.toast-close')) {
+                    removeToast(toast);
+                }
+            });
+        }
+        
+        // Close toast function
+        function closeToast(button) {
+            const toast = button.closest('.toast-notification');
+            removeToast(toast);
+        }
+        
+        // Remove toast with animation
+        function removeToast(toast) {
+            if (!toast || !toast.parentNode) return;
+            
+            toast.classList.add('hide');
+            
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 400);
+        }
+        
+        // Global toast functions for easy access
+        window.showSuccessToast = (message, duration) => showToast(message, 'success', duration);
+        window.showErrorToast = (message, duration) => showToast(message, 'error', duration);
+        window.showWarningToast = (message, duration) => showToast(message, 'warning', duration);
+        window.showInfoToast = (message, duration) => showToast(message, 'info', duration);
+        
+        // Get CSRF token function
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+    {% endblock %}
+</body>
+</html>
